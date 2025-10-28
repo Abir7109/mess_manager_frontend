@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import api, { setAccessToken, getSavedAccessToken } from '../api/client'
+import api, { setAccessToken } from '../api/client'
 
 const AuthCtx = createContext(null)
 
@@ -15,7 +15,8 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     const { data } = await api.post('/auth/login', { email, password })
     setUser(data.user)
-    setAccessToken(data.accessToken)
+    // rely on httpOnly sid cookie; do not persist token client-side
+    setAccessToken(null)
   }
 
   async function register(name, email, password) {
@@ -38,11 +39,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  useEffect(() => {
-    const saved = getSavedAccessToken()
-    if (saved) setAccessToken(saved)
-    loadMe()
-  }, [])
+  useEffect(() => { loadMe() }, [])
 
   async function updateProfile(fields) {
     const { data } = await api.patch('/users/me', fields)
