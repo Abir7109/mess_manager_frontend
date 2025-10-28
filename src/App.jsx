@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './theme.css'
 import Home from './pages/Home'
@@ -24,6 +24,12 @@ function NavBar() {
   const [open, setOpen] = useState(false)
   const close = () => setOpen(false)
   const LinkItem = ({ to, children }) => <Link to={to} onClick={close}>{children}</Link>
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('menu-open', open)
+    document.body.style.overflow = open ? 'hidden' : ''
+    return () => { document.documentElement.classList.remove('menu-open'); document.body.style.overflow = '' }
+  }, [open])
 
   return (
     <header className="nav">
@@ -90,14 +96,16 @@ function App() {
     <AuthProvider>
       <BrowserRouter basename={import.meta.env.BASE_URL}>
         <NavBar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
-          <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
-          <Route path="/extras" element={<Extras />} />
-        </Routes>
+        <div className="page-blur">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+            <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
+            <Route path="/extras" element={<Extras />} />
+          </Routes>
+        </div>
       </BrowserRouter>
     </AuthProvider>
   )
