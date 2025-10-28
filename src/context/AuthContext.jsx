@@ -40,7 +40,12 @@ export function AuthProvider({ children }) {
 
   useEffect(() => { loadMe() }, [])
 
-  const value = useMemo(() => ({ user, login, register, logout, dark, toggleDark: () => setDark(d => !d) }), [user, dark])
+  async function updateProfile(fields) {
+    const { data } = await api.patch('/users/me', fields)
+    setUser(data)
+  }
+
+  const value = useMemo(() => ({ user, login, register, logout, updateProfile, dark, toggleDark: () => setDark(d => !d) }), [user, dark])
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
 }

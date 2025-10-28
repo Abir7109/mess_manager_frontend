@@ -1,7 +1,11 @@
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
 import api from '../api/client'
 import { useAuth } from '../context/AuthContext'
+import Modal from '../components/Modal'
+import AnimatedNumber from '../components/AnimatedNumber'
+import GraphBar from '../components/GraphBar'
 
 function DayCell({ date, log, onChange }) {
   const [b, setB] = useState(!!log?.breakfast)
@@ -11,7 +15,7 @@ function DayCell({ date, log, onChange }) {
     await onChange(date, next)
   }
   return (
-    <div className="day">
+    <motion.div className="day" whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
       <h4>{dayjs(date).format('D ddd')}</h4>
       <div>
         <label><input type="checkbox" checked={b} onChange={e => { setB(e.target.checked); save({ breakfast: e.target.checked, dinner: d }) }} /> Breakfast</label>
@@ -19,15 +23,17 @@ function DayCell({ date, log, onChange }) {
       <div>
         <label><input type="checkbox" checked={d} onChange={e => { setD(e.target.checked); save({ breakfast: b, dinner: e.target.checked }) }} /> Dinner</label>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
 export default function Dashboard() {
-  const { user } = useAuth()
+  const { user, updateProfile } = useAuth()
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
   const [logs, setLogs] = useState([])
   const [summary, setSummary] = useState(null)
+  const [openProfile, setOpenProfile] = useState(false)
+  const [form, setForm] = useState({ name: '', phone: '', photoUrl: '' })
 
   const dates = useMemo(() => {
     const start = dayjs(month + '-01')
@@ -44,6 +50,10 @@ export default function Dashboard() {
     setSummary(s.data)
   })() }, [month])
 
+  useEffect(() => {
+    if (user) setForm({ name: user.name || '', phone: user.phone || '', photoUrl: user.photoUrl || '' })
+  }, [user])
+
   async function upsert(date, next) {
     const { data } = await api.post('/meals/mine', { date, ...next })
     setLogs(prev => {
@@ -57,38 +67,87 @@ export default function Dashboard() {
 
   function getLog(date) { return logs.find(l => l.date === date) }
 
+  const daysInMonth = dates.length
+  const meals = summary?.totalMeals || 0
+  const spent = summary?.totalCost || 0
+
   return (
     <div className="container">
       <div className="grid cols-2">
-        <div className="card">
-          <h2>Hello, {user?.name}</h2>
-          <p className="badge">Balance: {user?.balance?.toFixed?.(2) ?? user?.balance}</p>
-          {summary && (
-            <p>
-              <span className="badge">Month: {summary.month}</span>
-              <span className="badge">Meals: {summary.totalMeals}</span>
-              <span className="badge">Meal Cost: {summary.mealCost}</span>
-              <span className="badge">Spent: {summary.totalCost}</span>
-            </p>
-          )}
-          <label className="label">Month</label>
-          <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} />
-        </div>
-        <div className="card">
-          <h3>Profile</h3>
-          <p>Name: {user?.name}</p>
-          <p>Email: {user?.email}</p>
-          <p>Phone: {user?.phone || '-'}</p>
-        </div>
+        <motion.div className="card glass" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div>
+              <h2 style={{ margin: 0 }}>Welcome, {user?.name}</h2>
+              <p style={{ margin: '6px 0 12px', opacity:.85 }}>Here’s your month at a glance.</p>
+            </div>
+            <button className="btn teal pill" onClick={() => setOpenProfile(true)}>Edit Profile</button>
+          </div>
+
+          <div className="grid cols-3">
+            <div className="card" style={{ padding:12 }}>
+              <div className="label">Meals</div>
+              <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={meals} /></div>
+              <GraphBar value={meals} max={daysInMonth} />
+            </div>
+            <div className="card" style={{ padding:12 }}>
+              <div className="label">Spent</div>
+              <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={Math.round(spent)} prefix="৳" /></div>
+              <div className="badge">Meal Cost: {summary?.mealCost}</div>
+            </div>
+            <div className="card" style={{ padding:12 }}>
+              <div className="label">Balance</div>
+              <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={Math.round(user?.balance || 0)} prefix="৳" /></div>
+              <GraphBar value={user?.balance || 0} max={Math.max(user?.balance || 0, spent || 1)} />
+            </div>
+          </div>
+
+          <div style={{ marginTop:12 }}>
+            <label className="label">Month</label>
+            <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} />
+          </div>
+        </motion.div>
+
+        <motion.div className="card glass" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <h3 style={{ marginTop:0 }}>Profile</h3>
+          <div className="grid cols-2">
+            <div>
+              <p><span className="label">Name</span><br/>{user?.name}</p>
+              <p><span className="label">Email</span><br/>{user?.email}</p>
+            </div>
+            <div>
+              <p><span className="label">Phone</span><br/>{user?.phone || '-'}</p>
+              <p><span className="label">Photo</span><br/>{user?.photoUrl ? <a href={user.photoUrl} target="_blank">View</a> : '-'}</p>
+            </div>
+          </div>
+          <button className="btn" onClick={() => setOpenProfile(true)}>Update Profile</button>
+        </motion.div>
       </div>
-      <div className="card" style={{marginTop:16}}>
+
+      <motion.div className="card glass" style={{marginTop:16}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h3>Meals</h3>
         <div className="calendar">
           {dates.map(d => (
             <DayCell key={d} date={d} log={getLog(d)} onChange={(date, next) => upsert(date, next)} />
           ))}
         </div>
-      </div>
+      </motion.div>
+
+      <Modal open={openProfile} onClose={() => setOpenProfile(false)} title="Edit Profile"
+        footer={
+          <>
+            <button className="btn" onClick={() => setOpenProfile(false)}>Cancel</button>
+            <button className="btn teal" onClick={async () => { await updateProfile(form); setOpenProfile(false) }}>Save</button>
+          </>
+        }>
+        <div className="grid">
+          <label className="label">Name</label>
+          <input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+          <label className="label">Phone</label>
+          <input className="input" value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
+          <label className="label">Photo URL</label>
+          <input className="input" value={form.photoUrl} onChange={e => setForm(f => ({ ...f, photoUrl: e.target.value }))} />
+        </div>
+      </Modal>
     </div>
   )
 }
