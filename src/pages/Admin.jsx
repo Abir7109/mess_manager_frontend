@@ -80,7 +80,8 @@ export default function Admin() {
             <select className="input" value={countingRule} onChange={e=>setCountingRule(e.target.value)}>
               <option value="bothEqualsOne">Both meals = 1</option>
               <option value="anyMealIsOne">Any meal = 1</option>
-              <option value="perMeal">Per meal</option>
+              <option value="perMeal">Per meal (1.0 each)</option>
+              <option value="perMealHalf">Per meal (0.5 each)</option>
             </select>
           </div>
           <div style={{display:'flex', alignItems:'end', gap:8}}>
