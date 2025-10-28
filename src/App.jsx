@@ -7,6 +7,8 @@ import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
 import Extras from './pages/Extras'
 import { AuthProvider, useAuth } from './context/AuthContext'
+import { GiCookingPot } from 'react-icons/gi'
+import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield } from 'react-icons/fi'
 
 function Protected({ children, roles }) {
   const { user } = useAuth()
@@ -19,20 +21,20 @@ function NavBar() {
   const { user, logout, dark, toggleDark } = useAuth()
   return (
     <header className="nav">
-      <Link to="/" className="brand">Mess Manager</Link>
+      <Link to="/" className="brand"><GiCookingPot /> Mess Manager</Link>
       <nav>
-        <Link to="/">Home</Link>
-        <Link to="/extras">Extras</Link>
+        <Link to="/"><FiHome /> Home</Link>
+        <Link to="/extras"><FiGrid /> Extras</Link>
         {user ? (
           <>
-            <Link to="/dashboard">Dashboard</Link>
-            {user.role === 'admin' && <Link to="/admin">Admin</Link>}
+            <Link to="/dashboard"><FiGrid /> Dashboard</Link>
+            {user.role === 'admin' && <Link to="/admin"><FiShield /> Admin</Link>}
             <button onClick={logout}>Logout</button>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/login"><FiLogIn /> Login</Link>
+            <Link to="/register"><FiUserPlus /> Register</Link>
           </>
         )}
         <button onClick={toggleDark}>{dark ? 'Light' : 'Dark'}</button>

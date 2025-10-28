@@ -6,6 +6,7 @@ import {
   Chart as ChartJS,
   BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement
 } from 'chart.js'
+import { LuBarChart3, LuSearch } from 'react-icons/lu'
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend, ArcElement)
 
@@ -90,11 +91,14 @@ export default function Admin() {
       </div>
 
       <div className="card glass" style={{marginTop:16}}>
-        <h3 style={{marginTop:0}}>Analytics</h3>
+        <h3 style={{marginTop:0}}><LuBarChart3 /> Analytics</h3>
         <div className="grid cols-4">
           <div>
             <label className="label">Search</label>
-            <input className="input" placeholder="name or email" value={q} onChange={e=>setQ(e.target.value)} />
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <LuSearch style={{opacity:.7}} />
+              <input className="input" placeholder="name or email" value={q} onChange={e=>setQ(e.target.value)} />
+            </div>
           </div>
           <div>
             <label className="label">Sort By</label>

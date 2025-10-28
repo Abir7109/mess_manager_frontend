@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import Modal from '../components/Modal'
 import AnimatedNumber from '../components/AnimatedNumber'
 import GraphBar from '../components/GraphBar'
+import { LuSunrise, LuMoon } from 'react-icons/lu'
 
 function DayCell({ date, log, onChange }) {
   const [b, setB] = useState(!!log?.breakfast)
@@ -23,14 +24,14 @@ function DayCell({ date, log, onChange }) {
           className={`chip b ${b ? 'on' : 'off'}`}
           aria-pressed={b}
           onClick={() => { const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
-          Breakfast
+          <LuSunrise /> Breakfast
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.96 }}
           className={`chip d ${d ? 'on' : 'off'}`}
           aria-pressed={d}
           onClick={() => { const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
-          Dinner
+          <LuMoon /> Dinner
         </motion.button>
       </div>
     </motion.div>

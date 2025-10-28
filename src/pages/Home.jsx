@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
+import { LuCalendarClock, LuWallet, LuIdCard, LuBarChart3, LuUsers, LuMoonStar } from 'react-icons/lu'
 
 export default function Home() {
   const { user } = useAuth()
@@ -31,27 +32,27 @@ export default function Home() {
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
           <div className="tiles">
             <article className="tile">
-              <h3>Calendar Intelligence</h3>
+              <h3><LuCalendarClock /> Calendar Intelligence</h3>
               <p>Two meals count as one—auto-logged with a monthly summary.</p>
             </article>
             <article className="tile">
-              <h3>Balance Automation</h3>
+              <h3><LuWallet /> Balance Automation</h3>
               <p>Costs are deducted in real-time from your saved balance.</p>
             </article>
             <article className="tile">
-              <h3>Profile Cards</h3>
+              <h3><LuIdCard /> Profile Cards</h3>
               <p>Dynamic, editable user cards with meal history and contacts.</p>
             </article>
             <article className="tile">
-              <h3>Admin & Analytics</h3>
+              <h3><LuBarChart3 /> Admin & Analytics</h3>
               <p>Manage users, tweak meals, export branded PDFs, and view trends.</p>
             </article>
             <article className="tile">
-              <h3>Community</h3>
+              <h3><LuUsers /> Community</h3>
               <p>Meal voting and shared expense logs keep everyone in sync.</p>
             </article>
             <article className="tile">
-              <h3>Dark Mode</h3>
+              <h3><LuMoonStar /> Dark Mode</h3>
               <p>Charcoal-moss theme designed for late-night logging.</p>
             </article>
           </div>
