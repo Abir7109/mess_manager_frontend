@@ -92,13 +92,12 @@ export default function Admin() {
 
       <div className="card glass" style={{marginTop:16}}>
         <h3 style={{marginTop:0}}><FiBarChart2 /> Analytics</h3>
+      <div className="card glass" style={{marginTop:16}}>
+        <h3 style={{marginTop:0}}>Analytics</h3>
         <div className="grid cols-4">
           <div>
             <label className="label">Search</label>
-            <div style={{display:'flex',alignItems:'center',gap:8}}>
-              <FiSearch style={{opacity:.7}} />
-              <input className="input" placeholder="name or email" value={q} onChange={e=>setQ(e.target.value)} />
-            </div>
+            <input className="input" placeholder="name or email" value={q} onChange={e=>setQ(e.target.value)} />
           </div>
           <div>
             <label className="label">Sort By</label>
@@ -114,55 +113,60 @@ export default function Admin() {
           </div>
         </div>
 
-        <div className="grid cols-2" style={{marginTop:12}}>
-          <div className="card" style={{padding:12}}>
-            <h4 style={{margin:'6px 0'}}>Meals by User</h4>
-            {filtered.length ? <Bar options={barOpts} data={barMeals} /> : <em>No data</em>}
-          </div>
-          <div className="card" style={{padding:12}}>
-            <h4 style={{margin:'6px 0'}}>Spend by User</h4>
-            {filtered.length ? <Bar options={barOpts} data={barSpent} /> : <em>No data</em>}
-          </div>
-          <div className="card" style={{padding:12}}>
-            <h4 style={{margin:'6px 0'}}>Spend Share</h4>
-            {filtered.length ? <Doughnut data={doughnutShare} /> : <em>No data</em>}
-          </div>
-          <div className="card" style={{padding:12}}>
-            <h4 style={{margin:'6px 0'}}>Leaderboard</h4>
-            <ol style={{margin:0, paddingLeft:18}}>
-              {filtered.map((r,i)=> (
-                <li key={r.id} style={{marginBottom:6}}>{r.name} — ৳{Math.round(r.totalCost)} • {r.totalMeals} meals</li>
-              ))}
-            </ol>
+        <div className="scroll-x" style={{marginTop:12}}>
+          <div className="grid cols-2" style={{minWidth: 640}}>
+            <div className="card" style={{padding:12}}>
+              <h4 style={{margin:'6px 0'}}>Meals by User</h4>
+              {filtered.length ? <Bar options={barOpts} data={barMeals} /> : <em>No data</em>}
+            </div>
+            <div className="card" style={{padding:12}}>
+              <h4 style={{margin:'6px 0'}}>Spend by User</h4>
+              {filtered.length ? <Bar options={barOpts} data={barSpent} /> : <em>No data</em>}
+            </div>
+            <div className="card" style={{padding:12}}>
+              <h4 style={{margin:'6px 0'}}>Spend Share</h4>
+              {filtered.length ? <Doughnut data={doughnutShare} /> : <em>No data</em>}
+            </div>
+            <div className="card" style={{padding:12}}>
+              <h4 style={{margin:'6px 0'}}>Leaderboard</h4>
+              <ol style={{margin:0, paddingLeft:18}}>
+                {filtered.map((r,i)=> (
+                  <li key={r.id} style={{marginBottom:6}}>{r.name} — ৳{Math.round(r.totalCost)} • {r.totalMeals} meals</li>
+                ))}
+              </ol>
+            </div>
           </div>
         </div>
       </div>
 
       <div className="card" style={{marginTop:16}}>
-        <table className="table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Meals</th>
-              <th>Meal Cost</th>
-              <th>Spent</th>
-              <th>Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(r => (
-              <tr key={r.id}>
-                <td>{r.name}</td>
-                <td>{r.email}</td>
-                <td>{r.totalMeals}</td>
-                <td>{r.mealCost}</td>
-                <td>{r.totalCost}</td>
-                <td>{r.balance}</td>
+        <div className="scroll-x">
+          <table className="table wide">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Meals</th>
+                <th>Meal Cost</th>
+                <th>Spent</th>
+                <th>Balance</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.id}>
+                  <td>{r.name}</td>
+                  <td>{r.email}</td>
+                  <td>{r.totalMeals}</td>
+                  <td>{r.mealCost}</td>
+                  <td>{r.totalCost}</td>
+                  <td>{r.balance}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
       </div>
     </div>
   )
