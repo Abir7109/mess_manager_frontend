@@ -8,7 +8,7 @@ import Admin from './pages/Admin'
 import Extras from './pages/Extras'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GiCookingPot } from 'react-icons/gi'
-import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield } from 'react-icons/fi'
+import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon } from 'react-icons/fi'
 
 function Protected({ children, roles }) {
   const { user } = useAuth()
@@ -29,7 +29,7 @@ function NavBar() {
           <>
             <Link to="/dashboard"><FiGrid /> Dashboard</Link>
             {user.role === 'admin' && <Link to="/admin"><FiShield /> Admin</Link>}
-            <button onClick={logout}>Logout</button>
+            <button className="btn pill" onClick={logout}>Logout</button>
           </>
         ) : (
           <>
@@ -37,7 +37,7 @@ function NavBar() {
             <Link to="/register"><FiUserPlus /> Register</Link>
           </>
         )}
-        <button onClick={toggleDark}>{dark ? 'Light' : 'Dark'}</button>
+        <button className="icon-btn theme-toggle" aria-label="Toggle theme" title="Toggle theme" onClick={toggleDark}>{dark ? <FiSun /> : <FiMoon />}</button>
       </nav>
     </header>
   )
