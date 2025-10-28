@@ -70,7 +70,9 @@ export default function UsersPage() {
       </div>
 
       <Modal open={!!selected} onClose={closeDetail} title={selected ? selected.name : 'User'}>
-        {detail ? (detail.error ? <p style={{color:'crimson'}}>{detail.error}</p> : (
+        {!detail && <p>Loading…</p>}
+        {detail && detail.error && <p style={{color:'crimson'}}>{detail.error}</p>}
+        {detail && !detail.error && (
           <div className="grid">
             <div className="card">
               <div style={{display:'flex',gap:12,alignItems:'center'}}>
@@ -110,7 +112,7 @@ export default function UsersPage() {
               </div>
             )}
           </div>
-        ) : (<p>Loading…</p>)}
+        )}
       </Modal>
     </div>
   )
