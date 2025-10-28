@@ -4,7 +4,6 @@ import api from '../api/client'
 import Modal from '../components/Modal'
 import { useAuth } from '../context/AuthContext'
 import viteLogo from '/vite.svg'
-import { toAbsoluteUrl } from '../api/client'
 
 export default function UsersPage() {
   const { user } = useAuth()
@@ -80,7 +79,7 @@ export default function UsersPage() {
         {list.map(u => (
           <div key={u.id} className="card" style={{cursor:'pointer'}} onClick={()=>openDetail(u)}>
             <div style={{display:'flex', alignItems:'center', gap:12}}>
-              <img src={u.photoUrl ? toAbsoluteUrl(u.photoUrl) : placeholder} alt="" style={{width:48,height:48,borderRadius:12,objectFit:'cover'}} />
+              <img src={u.photoUrl ? (((api.defaults?.baseURL||'').replace(/\/api$/, '')) + (u.photoUrl.startsWith('/')? u.photoUrl : '/'+u.photoUrl)) : placeholder} alt="" style={{width:48,height:48,borderRadius:12,objectFit:'cover'}} />
               <div>
                 <div style={{fontWeight:800}}>{u.name}</div>
                 <div style={{opacity:.8,fontSize:12}}>{u.email}</div>
@@ -102,7 +101,7 @@ export default function UsersPage() {
           <div className="grid">
             <div className="card">
               <div style={{display:'flex',gap:12,alignItems:'center'}}>
-                <img src={detail.user.photoUrl ? toAbsoluteUrl(detail.user.photoUrl) : placeholder} style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
+                <img src={detail.user.photoUrl ? (((api.defaults?.baseURL||'').replace(/\/api$/, '')) + (detail.user.photoUrl.startsWith('/')? detail.user.photoUrl : '/'+detail.user.photoUrl)) : placeholder} style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
                 <div>
                   <div style={{fontWeight:900}}>{detail.user.name}</div>
                   <div style={{opacity:.8,fontSize:12}}>{detail.user.email} • {detail.user.phone||'-'}</div>

@@ -46,7 +46,7 @@ function NavBar() {
             <Link to="/dashboard"><FiGrid /> Dashboard</Link>
             {user.role === 'admin' && <Link to="/admin"><FiShield /> Admin</Link>}
             <button className="btn pill" onClick={() => { logout(); close() }}>Logout</button>
-            {user?.photoUrl && <img src={user.photoUrl} alt="" style={{width:28,height:28,borderRadius:999,objectFit:'cover'}} />}
+            {user?.photoUrl && <img src={((import.meta.env.VITE_API_URL || '').replace(/\/$/, '') || (typeof window!=='undefined' && (sessionStorage.getItem('MM_API_URL')||localStorage.getItem('MM_API_URL')||'')).replace(/\/$/,'') || '') + (user.photoUrl.startsWith('/')? user.photoUrl : '/'+user.photoUrl)} alt="" style={{width:28,height:28,borderRadius:999,objectFit:'cover'}} />}
           </>
         ) : (
           <>
