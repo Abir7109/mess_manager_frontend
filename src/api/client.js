@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const apiHost = (typeof window !== 'undefined' && (window.__MM_API_URL || localStorage.getItem('MM_API_URL'))) || import.meta.env.VITE_API_URL || 'https://mess-manager-backend-5q6y.onrender.com'
+const apiHost = (typeof window !== 'undefined' && (window.__MM_API_URL || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('MM_API_URL')) || (typeof localStorage !== 'undefined' && localStorage.getItem('MM_API_URL')))) || import.meta.env.VITE_API_URL || 'https://mess-manager-backend-5q6y.onrender.com'
 const api = axios.create({
   baseURL: apiHost.replace(/\/$/, '') + '/api',
   withCredentials: false,

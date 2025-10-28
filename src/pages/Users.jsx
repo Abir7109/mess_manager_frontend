@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 import api from '../api/client'
 import Modal from '../components/Modal'
 import { useAuth } from '../context/AuthContext'
+import viteLogo from '/vite.svg'
 
 export default function UsersPage() {
   const { user } = useAuth()
@@ -13,7 +14,7 @@ export default function UsersPage() {
   const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
   const [detail, setDetail] = useState(null)
-  const placeholder = new URL('/vite.svg', import.meta.env.BASE_URL).href
+  const placeholder = viteLogo
 
   async function load() {
     setLoading(true); setError('')
