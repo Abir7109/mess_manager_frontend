@@ -1,0 +1,50 @@
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import api, { setAccessToken } from '../api/client'
+
+const AuthCtx = createContext(null)
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null)
+  const [dark, setDark] = useState(() => localStorage.getItem('mm_dark') === '1')
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('mm_dark', dark ? '1' : '0')
+  }, [dark])
+
+  async function login(email, password) {
+    const { data } = await api.post('/auth/login', { email, password })
+    setUser(data.user)
+    setAccessToken(data.accessToken)
+  }
+
+  async function register(name, email, password) {
+    await api.post('/auth/register', { name, email, password })
+    return login(email, password)
+  }
+
+  async function logout() {
+    await api.post('/auth/logout')
+    setUser(null)
+    setAccessToken(null)
+  }
+
+  async function loadMe() {
+    try {
+      const { data } = await api.get('/users/me')
+      setUser(data)
+    } catch (e) {
+      // not logged in
+    }
+  }
+
+  useEffect(() => { loadMe() }, [])
+
+  const value = useMemo(() => ({ user, login, register, logout, dark, toggleDark: () => setDark(d => !d) }), [user, dark])
+
+  return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
+}
+
+export function useAuth() {
+  return useContext(AuthCtx)
+}
