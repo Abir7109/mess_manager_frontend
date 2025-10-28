@@ -46,6 +46,7 @@ function NavBar() {
             <Link to="/dashboard"><FiGrid /> Dashboard</Link>
             {user.role === 'admin' && <Link to="/admin"><FiShield /> Admin</Link>}
             <button className="btn pill" onClick={() => { logout(); close() }}>Logout</button>
+            {user?.photoUrl && <img src={user.photoUrl} alt="" style={{width:28,height:28,borderRadius:999,objectFit:'cover'}} />}
           </>
         ) : (
           <>

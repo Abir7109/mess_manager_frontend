@@ -123,17 +123,24 @@ export default function Dashboard() {
 
         <motion.div className="card glass" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <h3 style={{ marginTop:0 }}>Profile</h3>
-          <div className="grid cols-2">
+          <div style={{display:'flex',gap:12,alignItems:'center'}}>
+            <img src={user?.photoUrl||'/vite.svg'} alt="" style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
             <div>
-              <p><span className="label">Name</span><br/>{user?.name}</p>
-              <p><span className="label">Email</span><br/>{user?.email}</p>
-            </div>
-            <div>
-              <p><span className="label">Phone</span><br/>{user?.phone || '-'}</p>
-              <p><span className="label">Photo</span><br/>{user?.photoUrl ? <a href={user.photoUrl} target="_blank">View</a> : '-'}</p>
+              <p style={{margin:0}}><strong>{user?.name}</strong></p>
+              <p style={{margin:0,opacity:.8}}>{user?.email}</p>
+              <p style={{margin:0,opacity:.8}}>Phone: {user?.phone || '-'}</p>
             </div>
           </div>
-          <button className="btn" onClick={() => setOpenProfile(true)}>Update Profile</button>
+          <div style={{marginTop:10}}>
+            <label className="label">Upload new photo</label>
+            <input type="file" accept="image/*" onChange={async e=>{
+              const f=e.target.files?.[0]; if(!f) return;
+              const fd=new FormData(); fd.append('photo', f);
+              await api.post('/users/me/photo', fd, { headers: { 'Content-Type': 'multipart/form-data' }})
+              const me = await api.get('/users/me');
+              location.reload();
+            }} />
+          </div>
         </motion.div>
       </div>
 
