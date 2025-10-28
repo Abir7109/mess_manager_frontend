@@ -10,11 +10,18 @@ let accessToken = null
 
 export function setAccessToken(token) {
   accessToken = token
+  try {
+    if (token) localStorage.setItem('MM_AT', token)
+    else localStorage.removeItem('MM_AT')
+  } catch {}
 }
 export function setApiHost(url) {
   if (!url) return
   localStorage.setItem('MM_API_URL', url)
   api.defaults.baseURL = url.replace(/\/$/, '') + '/api'
+}
+export function getSavedAccessToken() {
+  try { return localStorage.getItem('MM_AT') } catch { return null }
 }
 
 api.interceptors.request.use((config) => {
