@@ -134,8 +134,6 @@ export default function Admin() {
 
       <div className="card glass" style={{marginTop:16}}>
         <h3 style={{marginTop:0}}><FiBarChart2 /> Analytics</h3>
-      <div className="card glass" style={{marginTop:16}}>
-        <h3 style={{marginTop:0}}>Analytics</h3>
         <div className="grid cols-4">
           <div>
             <label className="label">Search</label>
@@ -154,7 +152,6 @@ export default function Admin() {
             <input className="input" type="number" min="1" max="50" value={topN} onChange={e=>setTopN(parseInt(e.target.value||'1',10))} />
           </div>
         </div>
-
         <div className="scroll-x" style={{marginTop:12}}>
           <div className="grid cols-2" style={{minWidth: 640}}>
             <div className="card" style={{padding:12}}>
@@ -183,31 +180,29 @@ export default function Admin() {
 
       <div className="scroll-x" style={{marginTop:16}}>
         <table className="table wide">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Meals</th>
-                <th>Meal Cost</th>
-                <th>Spent</th>
-                <th>Balance</th>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Meals</th>
+              <th>Meal Cost</th>
+              <th>Spent</th>
+              <th>Balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(r => (
+              <tr key={r.id}>
+                <td>{r.name}</td>
+                <td>{r.email}</td>
+                <td>{r.totalMeals}</td>
+                <td>{r.mealCost}</td>
+                <td>{r.totalCost}</td>
+                <td>{r.balance}</td>
               </tr>
-            </thead>
-            <tbody>
-              {rows.map(r => (
-                <tr key={r.id}>
-                  <td>{r.name}</td>
-                  <td>{r.email}</td>
-                  <td>{r.totalMeals}</td>
-                  <td>{r.mealCost}</td>
-                  <td>{r.totalCost}</td>
-                  <td>{r.balance}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       <Modal open={!!editUser} onClose={closeEditUser} title="Edit User"
