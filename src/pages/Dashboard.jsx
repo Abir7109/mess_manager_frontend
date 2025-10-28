@@ -11,17 +11,27 @@ function DayCell({ date, log, onChange }) {
   const [b, setB] = useState(!!log?.breakfast)
   const [d, setD] = useState(!!log?.dinner)
   useEffect(() => { setB(!!log?.breakfast); setD(!!log?.dinner) }, [log])
-  async function save(next) {
-    await onChange(date, next)
-  }
+  async function save(next) { await onChange(date, next) }
+  const cls = `day${b ? ' with-b' : ''}${d ? ' with-d' : ''}`
   return (
-    <motion.div className="day" whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+    <motion.div className={cls} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+      <div className="hint">{b ? 'B✓' : 'B✕'} • {d ? 'D✓' : 'D✕'}</div>
       <h4>{dayjs(date).format('D ddd')}</h4>
-      <div>
-        <label><input type="checkbox" checked={b} onChange={e => { setB(e.target.checked); save({ breakfast: e.target.checked, dinner: d }) }} /> Breakfast</label>
-      </div>
-      <div>
-        <label><input type="checkbox" checked={d} onChange={e => { setD(e.target.checked); save({ breakfast: b, dinner: e.target.checked }) }} /> Dinner</label>
+      <div className="meal-toggles">
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          className={`chip b ${b ? 'on' : 'off'}`}
+          aria-pressed={b}
+          onClick={() => { const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
+          Breakfast
+        </motion.button>
+        <motion.button
+          whileTap={{ scale: 0.96 }}
+          className={`chip d ${d ? 'on' : 'off'}`}
+          aria-pressed={d}
+          onClick={() => { const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
+          Dinner
+        </motion.button>
       </div>
     </motion.div>
   )

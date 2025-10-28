@@ -87,7 +87,7 @@ body {
 
 /* Calendar */
 .calendar { display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; }
-.day { border:1px solid var(--warm-beige); border-radius:10px; padding:8px; background:#fff; box-shadow: 0 4px 12px var(--shadow); }
+ .day { position:relative; border:1px solid var(--warm-beige); border-radius:10px; padding:8px; background:#fff; box-shadow: 0 4px 12px var(--shadow); transition: box-shadow .2s ease, transform .15s ease; }
 .day h4 { margin:0 0 6px 0; font-size:0.9rem; color: var(--earthy-brown); }
 .badge { display:inline-block; padding:2px 6px; border-radius:999px; background: var(--soft-cream); margin-right:6px; }
 
@@ -109,3 +109,18 @@ body {
 /* Graph bars */
 .bar { height: 10px; border-radius: 999px; background: rgba(0,0,0,0.08); overflow:hidden; }
 .bar > .fill { height: 100%; background: linear-gradient(135deg, var(--teal), #115e59); border-radius: 999px; }
+
+/* Meal glow states */
+.day.with-b { box-shadow: 0 0 0 2px rgba(255,213,107,0.4), 0 10px 24px rgba(255,213,107,0.18), 0 4px 12px var(--shadow); }
+.day.with-d { box-shadow: 0 0 0 2px rgba(15,118,110,0.35), 0 10px 24px rgba(15,118,110,0.16), 0 4px 12px var(--shadow); }
+.day.with-b.with-d { box-shadow: 0 0 0 2px rgba(255,213,107,0.38), 0 0 0 6px rgba(15,118,110,0.18), 0 14px 28px rgba(15,118,110,0.18); }
+
+.meal-toggles { display:flex; gap:8px; margin-top:6px; flex-wrap:wrap; }
+.chip { border-radius: 999px; padding:6px 10px; border:1px solid rgba(0,0,0,0.08); font-weight:700; cursor:pointer; box-shadow: 0 4px 10px var(--shadow); background: #fff; }
+.chip.b.on { background: linear-gradient(135deg, var(--gold), #f1b84a); color: #3a2b1a; }
+.chip.d.on { background: linear-gradient(135deg, var(--teal), #115e59); color: white; }
+.chip.off { opacity: .8; }
+
+/* Hover hint */
+.hint { position:absolute; right:8px; top:8px; font-size: 0.75rem; background: rgba(0,0,0,0.55); color: white; padding: 4px 8px; border-radius: 999px; opacity: 0; transform: translateY(-4px); transition: opacity .15s ease, transform .15s ease; }
+.day:hover .hint { opacity: 1; transform: translateY(0); }
