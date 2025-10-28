@@ -32,26 +32,39 @@ body {
 
 /* Nav */
 .nav {
-  position: sticky; top: 0; z-index: 20;
+  position: sticky; top: 0; z-index: 30;
   display:flex; align-items:center; justify-content:space-between; gap:16px;
   padding: 12px 20px; border-bottom: 1px solid rgba(0,0,0,0.05);
   backdrop-filter: blur(8px);
   background: linear-gradient(90deg, rgba(255,225,175,0.85), rgba(226,181,154,0.85));
 }
  .nav .brand { display:flex; align-items:center; gap:8px; color: var(--earthy-brown); font-weight: 900; text-decoration:none; font-size: 1.3rem; letter-spacing: 0.3px; }
-.nav nav { display:flex; align-items:center; gap:12px; flex-wrap: wrap; }
+.desktop-nav { display:flex; align-items:center; gap:12px; flex-wrap: wrap; }
 .nav a { color: var(--earthy-brown); text-decoration:none; font-weight:600; opacity:0.9; white-space: nowrap; }
 .nav a:hover { opacity:1; text-shadow: 0 0 12px rgba(149,124,98,0.3); }
 .nav button { background: linear-gradient(135deg, var(--teal), #115e59); color:white; border:none; border-radius:10px; padding:8px 12px; cursor:pointer; box-shadow: 0 8px 20px var(--shadow); }
+.hamburger-btn { display: none; }
 
 /* Compact icon button for theme toggle */
 .icon-btn { width: 36px; height: 36px; border-radius: 999px; display:inline-flex; align-items:center; justify-content:center; padding:0; }
 .theme-toggle { background: linear-gradient(135deg, var(--earthy-brown), #6e5641); }
 
+/* Mobile drawer */
+.mobile-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 40; }
+.mobile-menu { position: fixed; top: 0; right: 0; height: 100%; width: 82%; max-width: 360px; background: var(--panel); z-index: 41; box-shadow: -16px 0 40px var(--shadow); display:flex; flex-direction: column; }
+.mobile-menu-header { display:flex; align-items:center; justify-content:space-between; gap:8px; padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.mobile-menu-body { display:flex; flex-direction:column; gap:12px; padding: 16px; }
+.mobile-menu a { color: var(--earthy-brown); text-decoration: none; font-weight:700; display:flex; gap:10px; align-items:center; }
+
+@media (max-width: 768px) {
+  .desktop-nav { display: none; }
+  .hamburger-btn { display:inline-flex; background: linear-gradient(135deg, var(--teal), #115e59); }
+}
+
 @media (max-width: 480px) {
   .nav { padding: 10px 14px; }
   .nav .brand { font-size: 1.05rem; }
-  .nav nav { gap: 8px; }
+  .desktop-nav { gap: 8px; }
   .btn { padding: 8px 10px; }
 }
 
