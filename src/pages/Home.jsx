@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { LuCalendarClock, LuWallet, LuIdCard, LuUsers, LuMoonStar } from 'react-icons/lu'
 import { FiBarChart2 } from 'react-icons/fi'
@@ -19,11 +20,11 @@ export default function Home() {
           <div className="actions">
             {!user ? (
               <>
-                <a className="btn teal" href="/login">Get Started</a>
-                <a className="btn" href="/register">Create Account</a>
+                <Link className="btn teal" to="/login">Get Started</Link>
+                <Link className="btn" to="/register">Create Account</Link>
               </>
             ) : (
-              <a className="btn teal" href="/dashboard">Open Dashboard</a>
+              <Link className="btn teal" to="/dashboard">Open Dashboard</Link>
             )}
           </div>
         </motion.div>
