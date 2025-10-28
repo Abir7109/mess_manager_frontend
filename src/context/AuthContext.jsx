@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import api, { setAccessToken } from '../api/client'
+import api, { setAccessToken, getSavedAccessToken } from '../api/client'
 
 const AuthCtx = createContext(null)
 
@@ -42,7 +42,13 @@ export function AuthProvider({ children }) {
     }
   }
 
-  useEffect(() => { loadMe() }, [])
+  useEffect(() => {
+    const at = getSavedAccessToken()
+    if (at) {
+      setAccessToken(at)
+      loadMe()
+    }
+  }, [])
 
   async function updateProfile(fields) {
     const { data } = await api.patch('/users/me', fields)
