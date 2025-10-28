@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { LuCalendarClock, LuWallet, LuIdCard, LuBarChart3, LuUsers, LuMoonStar } from 'react-icons/lu'
+import { LuCalendarClock, LuWallet, LuIdCard, LuUsers, LuMoonStar } from 'react-icons/lu'
+import { FiBarChart2 } from 'react-icons/fi'
 
 export default function Home() {
   const { user } = useAuth()
@@ -44,7 +45,7 @@ export default function Home() {
               <p>Dynamic, editable user cards with meal history and contacts.</p>
             </article>
             <article className="tile">
-              <h3><LuBarChart3 /> Admin & Analytics</h3>
+              <h3><FiBarChart2 /> Admin & Analytics</h3>
               <p>Manage users, tweak meals, export branded PDFs, and view trends.</p>
             </article>
             <article className="tile">
