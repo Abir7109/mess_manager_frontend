@@ -9,19 +9,31 @@ export default function UsersPage() {
   const isAdmin = user?.role === 'admin'
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
   const [list, setList] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [selected, setSelected] = useState(null)
   const [detail, setDetail] = useState(null)
+  const placeholder = new URL('/vite.svg', import.meta.env.BASE_URL).href
 
   async function load() {
-    const { data } = await api.get('/public/users', { params: { month } })
-    setList(data.users)
+    setLoading(true); setError('')
+    try {
+      const { data } = await api.get('/public/users', { params: { month } })
+      setList(data.users || [])
+    } catch (e) {
+      setError(e?.response?.data?.error || 'Failed to load users')
+    } finally { setLoading(false) }
   }
   useEffect(() => { load() }, [month])
 
   async function openDetail(u) {
-    setSelected(u)
-    const { data } = await api.get(`/public/users/${u.id}`, { params: { month } })
-    setDetail(data)
+    setSelected(u); setDetail(null)
+    try {
+      const { data } = await api.get(`/public/users/${u.id}`, { params: { month } })
+      setDetail(data)
+    } catch (e) {
+      setDetail({ error: e?.response?.data?.error || 'Failed to load user' })
+    }
   }
   function closeDetail() { setSelected(null); setDetail(null) }
 
@@ -33,10 +45,15 @@ export default function UsersPage() {
         <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} />
       </div>
       <div className="grid cols-3" style={{marginTop:16}}>
+        {loading && <div className="card"><p>Loading…</p></div>}
+        {error && <div className="card" style={{color:'crimson'}}>{error}</div>}
+        {!loading && !error && list.length === 0 && (
+          <div className="card"><p>No users yet.</p></div>
+        )}
         {list.map(u => (
           <div key={u.id} className="card" style={{cursor:'pointer'}} onClick={()=>openDetail(u)}>
             <div style={{display:'flex', alignItems:'center', gap:12}}>
-              <img src={u.photoUrl||'/vite.svg'} alt="" style={{width:48,height:48,borderRadius:12,objectFit:'cover'}} />
+              <img src={u.photoUrl||placeholder} alt="" style={{width:48,height:48,borderRadius:12,objectFit:'cover'}} />
               <div>
                 <div style={{fontWeight:800}}>{u.name}</div>
                 <div style={{opacity:.8,fontSize:12}}>{u.email}</div>
@@ -52,11 +69,11 @@ export default function UsersPage() {
       </div>
 
       <Modal open={!!selected} onClose={closeDetail} title={selected ? selected.name : 'User'}>
-        {detail ? (
+        {detail ? (detail.error ? <p style={{color:'crimson'}}>{detail.error}</p> : (
           <div className="grid">
             <div className="card">
               <div style={{display:'flex',gap:12,alignItems:'center'}}>
-                <img src={detail.user.photoUrl||'/vite.svg'} style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
+                <img src={detail.user.photoUrl||placeholder} style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
                 <div>
                   <div style={{fontWeight:900}}>{detail.user.name}</div>
                   <div style={{opacity:.8,fontSize:12}}>{detail.user.email} • {detail.user.phone||'-'}</div>

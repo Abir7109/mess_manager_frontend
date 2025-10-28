@@ -11,7 +11,7 @@ import Extras from './pages/Extras'
 import UsersPage from './pages/Users'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GiCookingPot } from 'react-icons/gi'
-import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi'
+import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon, FiMenu, FiX, FiUsers } from 'react-icons/fi'
 
 function Protected({ children, roles }) {
   const { user } = useAuth()
@@ -40,7 +40,7 @@ function NavBar() {
       <nav className="desktop-nav">
         <Link to="/"><FiHome /> Home</Link>
         <Link to="/extras"><FiGrid /> Extras</Link>
-        <Link to="/users">Users</Link>
+        <Link to="/users"><FiUsers /> Users</Link>
         {user ? (
           <>
             <Link to="/dashboard"><FiGrid /> Dashboard</Link>
