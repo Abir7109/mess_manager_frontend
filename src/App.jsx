@@ -78,6 +78,7 @@ function NavBar() {
                 <LinkItem to="/dashboard"><FiGrid /> Dashboard</LinkItem>
                 {user?.role === 'admin' && <LinkItem to="/admin"><FiShield /> Admin</LinkItem>}
                 <LinkItem to="/extras"><FiGrid /> Extras</LinkItem>
+                <LinkItem to="/users"><FiUsers /> Users</LinkItem>
                 {!user && <LinkItem to="/login"><FiLogIn /> Login</LinkItem>}
                 {!user && <LinkItem to="/register"><FiUserPlus /> Register</LinkItem>}
                 {user && <button className="btn pill" onClick={() => { logout(); close() }}>Logout</button>}

@@ -181,45 +181,8 @@ export default function Admin() {
         </div>
       </div>
 
-      <div className="card" style={{marginTop:16}}>
-        <h3 style={{marginTop:0}}>Users</h3>
-        <div className="grid cols-2">
-          <div>
-            <div className="scroll-x">
-              <table className="table wide">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Balance</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map(u => (
-                    <tr key={u._id || u.id}>
-                      <td>{u.name}</td>
-                      <td>{u.email}</td>
-                      <td>{u.role}</td>
-                      <td>{u.balance}</td>
-                      <td>
-                        <button className="btn" onClick={()=>openEditUser(u)}>Edit</button>
-                        <span style={{margin:'0 6px'}} />
-                        <button className="btn teal" onClick={()=>openMealsEditor(u)}>Meals</button>
-                        <span style={{margin:'0 6px'}} />
-                        <button className="btn" onClick={()=>deleteUser(u._id || u.id)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <div className="scroll-x" style={{marginTop:16}}>
-          <table className="table wide">
+      <div className="scroll-x" style={{marginTop:16}}>
+        <table className="table wide">
             <thead>
               <tr>
                 <th>Name</th>

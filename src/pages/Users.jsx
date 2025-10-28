@@ -40,7 +40,8 @@ export default function UsersPage() {
   return (
     <div className="container">
       <div className="card">
-        <h2 style={{marginTop:0}}>Users</h2>
+        <h2 style={{marginTop:0}}><span style={{display:'inline-flex',alignItems:'center',gap:8}}><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05A6.5 6.5 0 0 1 20 19v.5h4V17c0-2.33-4.67-4-8-4z"/></svg> Users</span></h2>
+        <p style={{opacity:.8, marginTop:4}}>Public directory of members and their monthly meal stats.</p>
         <label className="label">Month</label>
         <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} />
       </div>
