@@ -41,7 +41,9 @@ export default function UsersPage() {
   useEffect(() => { load() }, [month])
 
   async function openDetail(u) {
-    setSelected(u); setDetail(null)
+    setSelected(u)
+    // show basic info immediately
+    setDetail({ month, user: { id: u.id, name: u.name, email: u.email, phone: u.phone, photoUrl: u.photoUrl, balance: u.balance }, totalMeals: u.totalMeals||0, totalCost: u.totalCost||0, mealCost: 0, logs: [] })
     try {
       const { data } = await api.get(`/public/users/${u.id}`, { params: { month } })
       setDetail(data)
@@ -51,12 +53,9 @@ export default function UsersPage() {
           const { data } = await api.get('/admin/overview', { params: { month } })
           const found = (data.users||[]).find(x => (x.id||x._id) === u.id)
           if (found) setDetail({ month, user: { id: u.id, name: u.name, email: u.email, phone: u.phone, photoUrl: u.photoUrl, balance: u.balance }, totalMeals: found.totalMeals||0, totalCost: found.totalCost||0, mealCost: data.settings?.mealCost||0, logs: [] })
-          else setDetail({ error: 'User not found' })
         } catch (err2) {
-          setDetail({ error: err2?.response?.data?.error || 'Failed to load user' })
+          // keep basic detail; optionally attach message
         }
-      } else {
-        setDetail({ error: e?.response?.data?.error || 'Failed to load user' })
       }
     }
   }
