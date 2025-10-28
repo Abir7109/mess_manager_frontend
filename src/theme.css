@@ -72,6 +72,10 @@ body {
   .btn { padding: 8px 10px; }
 }
 
+@media (max-width: 600px) {
+  .modal-content { max-width: 96vw; width: 96vw; }
+}
+
  .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 .card { background: var(--panel); border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px var(--shadow); overflow-wrap: anywhere; }
 
@@ -159,7 +163,7 @@ body {
 
 /* Modal */
 .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(6px); display:flex; align-items:center; justify-content:center; padding: 20px; z-index: 50; }
-.modal-content { width: 100%; max-width: 520px; border-radius: 16px; background: var(--panel); box-shadow: 0 18px 50px var(--shadow); border: 1px solid rgba(0,0,0,0.06); }
+ .modal-content { width: 100%; max-width: 520px; border-radius: 16px; background: var(--panel); box-shadow: 0 18px 50px var(--shadow); border: 1px solid rgba(0,0,0,0.06); max-height: 90vh; overflow: auto; }
 .modal-header { display:flex; align-items:center; justify-content:space-between; padding: 14px 16px; border-bottom: 1px solid rgba(0,0,0,0.06); }
 .modal-body { padding: 16px; }
 .modal-actions { display:flex; gap:10px; justify-content:flex-end; padding: 0 16px 16px; }

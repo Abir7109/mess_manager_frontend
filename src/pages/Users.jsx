@@ -4,6 +4,7 @@ import api from '../api/client'
 import Modal from '../components/Modal'
 import { useAuth } from '../context/AuthContext'
 import viteLogo from '/vite.svg'
+import { toAbsoluteUrl } from '../api/client'
 
 export default function UsersPage() {
   const { user } = useAuth()
@@ -15,6 +16,9 @@ export default function UsersPage() {
   const [selected, setSelected] = useState(null)
   const [detail, setDetail] = useState(null)
   const placeholder = viteLogo
+  const [adminEdit, setAdminEdit] = useState(null)
+  const [adminMealsMonth, setAdminMealsMonth] = useState(dayjs().format('YYYY-MM'))
+  const [adminMealsLogs, setAdminMealsLogs] = useState([])
 
   async function load() {
     setLoading(true); setError('')
@@ -76,7 +80,7 @@ export default function UsersPage() {
         {list.map(u => (
           <div key={u.id} className="card" style={{cursor:'pointer'}} onClick={()=>openDetail(u)}>
             <div style={{display:'flex', alignItems:'center', gap:12}}>
-              <img src={u.photoUrl||placeholder} alt="" style={{width:48,height:48,borderRadius:12,objectFit:'cover'}} />
+              <img src={u.photoUrl ? toAbsoluteUrl(u.photoUrl) : placeholder} alt="" style={{width:48,height:48,borderRadius:12,objectFit:'cover'}} />
               <div>
                 <div style={{fontWeight:800}}>{u.name}</div>
                 <div style={{opacity:.8,fontSize:12}}>{u.email}</div>
@@ -98,7 +102,7 @@ export default function UsersPage() {
           <div className="grid">
             <div className="card">
               <div style={{display:'flex',gap:12,alignItems:'center'}}>
-                <img src={detail.user.photoUrl||placeholder} style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
+                <img src={detail.user.photoUrl ? toAbsoluteUrl(detail.user.photoUrl) : placeholder} style={{width:60,height:60,borderRadius:12,objectFit:'cover'}} />
                 <div>
                   <div style={{fontWeight:900}}>{detail.user.name}</div>
                   <div style={{opacity:.8,fontSize:12}}>{detail.user.email} • {detail.user.phone||'-'}</div>
@@ -130,7 +134,57 @@ export default function UsersPage() {
             </div>
             {isAdmin && (
               <div className="card">
-                <p>Admin can edit this user in Admin → Users.</p>
+                <h4 style={{marginTop:0}}>Admin actions</h4>
+                <div className="grid">
+                  <label className="label">Name</label>
+                  <input className="input" value={adminEdit?.name ?? detail.user.name} onChange={e=>setAdminEdit({ ...(adminEdit||{}), name:e.target.value })} />
+                  <label className="label">Email</label>
+                  <input className="input" value={adminEdit?.email ?? detail.user.email} onChange={e=>setAdminEdit({ ...(adminEdit||{}), email:e.target.value })} />
+                  <label className="label">Role</label>
+                  <select className="input" value={adminEdit?.role ?? 'user'} onChange={e=>setAdminEdit({ ...(adminEdit||{}), role:e.target.value })}>
+                    <option value="user">user</option>
+                    <option value="admin">admin</option>
+                  </select>
+                  <label className="label">Balance</label>
+                  <input className="input" type="number" value={adminEdit?.balance ?? detail.user.balance} onChange={e=>setAdminEdit({ ...(adminEdit||{}), balance:Number(e.target.value) })} />
+                  <label className="label">Upload Photo</label>
+                  <input type="file" accept="image/*" onChange={async e=>{
+                    const f=e.target.files?.[0]; if(!f) return;
+                    const fd=new FormData(); fd.append('photo', f);
+                    await api.post(`/admin/users/${detail.user.id}/photo`, fd, { headers: { 'Content-Type': 'multipart/form-data' }})
+                    // refresh detail
+                    const { data } = await api.get(`/public/users/${detail.user.id}`, { params: { month } }).catch(()=>({data:null}))
+                    if (data) setDetail(data)
+                  }} />
+                  <div>
+                    <button className="btn teal" onClick={async ()=>{
+                      const body = { name: adminEdit?.name ?? detail.user.name, email: adminEdit?.email ?? detail.user.email, role: adminEdit?.role ?? 'user', balance: adminEdit?.balance ?? detail.user.balance }
+                      await api.patch(`/admin/users/${detail.user.id}`, body)
+                      setAdminEdit(null)
+                      // refresh summary list entry as well
+                      await load()
+                    }}>Save</button>
+                  </div>
+                </div>
+                <div className="card" style={{marginTop:12}}>
+                  <h4 style={{marginTop:0}}>Meals editor</h4>
+                  <label className="label">Month</label>
+                  <input className="input" type="month" value={adminMealsMonth} onChange={async e=>{ setAdminMealsMonth(e.target.value); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: e.target.value } }); setAdminMealsLogs(res.data.logs||[]) }} />
+                  <div className="scroll-x" style={{marginTop:8}}>
+                    <table className="table wide">
+                      <thead><tr><th>Date</th><th>Breakfast</th><th>Dinner</th></tr></thead>
+                      <tbody>
+                        {adminMealsLogs.map(l => (
+                          <tr key={l._id||l.date}>
+                            <td>{l.date}</td>
+                            <td><input type="checkbox" checked={!!l.breakfast} onChange={async e=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, breakfast: e.target.checked, dinner: l.dinner }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }} /></td>
+                            <td><input type="checkbox" checked={!!l.dinner} onChange={async e=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, dinner: e.target.checked, breakfast: l.breakfast }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }} /></td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             )}
           </div>
