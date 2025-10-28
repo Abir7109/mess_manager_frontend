@@ -15,8 +15,11 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     const { data } = await api.post('/auth/login', { email, password })
     setUser(data.user)
-    // rely on httpOnly sid cookie; do not persist token client-side
-    setAccessToken(null)
+    setAccessToken(data.accessToken)
+    if (data.refreshToken) {
+      const { setRefreshToken } = await import('../api/client')
+      setRefreshToken(data.refreshToken)
+    }
   }
 
   async function register(name, email, password) {
