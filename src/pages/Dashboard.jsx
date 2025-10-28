@@ -24,14 +24,14 @@ function DayCell({ date, log, onChange }) {
           className={`chip b ${b ? 'on' : 'off'}`}
           aria-pressed={b}
           onClick={() => { const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
-          <LuSunrise /> Breakfast
+          <LuSunrise /> <span className="txt">Breakfast</span>
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.96 }}
           className={`chip d ${d ? 'on' : 'off'}`}
           aria-pressed={d}
           onClick={() => { const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
-          <LuMoon /> Dinner
+          <LuMoon /> <span className="txt">Dinner</span>
         </motion.button>
       </div>
     </motion.div>
@@ -136,10 +136,12 @@ export default function Dashboard() {
 
       <motion.div className="card glass" style={{marginTop:16}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h3>Meals</h3>
-        <div className="calendar">
-          {dates.map(d => (
-            <DayCell key={d} date={d} log={getLog(d)} onChange={(date, next) => upsert(date, next)} />
-          ))}
+        <div className="calendar-wrap">
+          <div className="calendar">
+            {dates.map(d => (
+              <DayCell key={d} date={d} log={getLog(d)} onChange={(date, next) => upsert(date, next)} />
+            ))}
+          </div>
         </div>
       </motion.div>
 
