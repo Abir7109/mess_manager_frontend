@@ -8,11 +8,11 @@ import AnimatedNumber from '../components/AnimatedNumber'
 import GraphBar from '../components/GraphBar'
 import { LuSunrise, LuMoon } from 'react-icons/lu'
 
-function DayCell({ date, log, onChange }) {
+function DayCell({ date, log, onChange, editable }) {
   const [b, setB] = useState(!!log?.breakfast)
   const [d, setD] = useState(!!log?.dinner)
   useEffect(() => { setB(!!log?.breakfast); setD(!!log?.dinner) }, [log])
-  async function save(next) { await onChange(date, next) }
+  async function save(next) { if (editable) await onChange(date, next) }
   const cls = `day${b ? ' with-b' : ''}${d ? ' with-d' : ''}`
   return (
     <motion.div className={cls} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
@@ -23,14 +23,16 @@ function DayCell({ date, log, onChange }) {
           whileTap={{ scale: 0.96 }}
           className={`chip b ${b ? 'on' : 'off'}`}
           aria-pressed={b}
-          onClick={() => { const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
+          disabled={!editable}
+          onClick={() => { if (!editable) return; const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
           <LuSunrise /> <span className="txt">Breakfast</span>
         </motion.button>
         <motion.button
           whileTap={{ scale: 0.96 }}
           className={`chip d ${d ? 'on' : 'off'}`}
           aria-pressed={d}
-          onClick={() => { const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
+          disabled={!editable}
+          onClick={() => { if (!editable) return; const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
           <LuMoon /> <span className="txt">Dinner</span>
         </motion.button>
       </div>
@@ -40,6 +42,7 @@ function DayCell({ date, log, onChange }) {
 
 export default function Dashboard() {
   const { user, updateProfile } = useAuth()
+  const isAdmin = user?.role === 'admin'
   const [month, setMonth] = useState(dayjs().format('YYYY-MM'))
   const [logs, setLogs] = useState([])
   const [summary, setSummary] = useState(null)
@@ -138,9 +141,9 @@ export default function Dashboard() {
         <h3>Meals</h3>
         <div className="calendar-wrap">
           <div className="calendar">
-            {dates.map(d => (
-              <DayCell key={d} date={d} log={getLog(d)} onChange={(date, next) => upsert(date, next)} />
-            ))}
+          {dates.map(d => (
+            <DayCell key={d} date={d} log={getLog(d)} editable={isAdmin || true} onChange={(date, next) => upsert(date, next)} />
+          ))}
           </div>
         </div>
       </motion.div>

@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
 import Extras from './pages/Extras'
+import UsersPage from './pages/Users'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GiCookingPot } from 'react-icons/gi'
 import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon, FiMenu, FiX } from 'react-icons/fi'
@@ -39,6 +40,7 @@ function NavBar() {
       <nav className="desktop-nav">
         <Link to="/"><FiHome /> Home</Link>
         <Link to="/extras"><FiGrid /> Extras</Link>
+        <Link to="/users">Users</Link>
         {user ? (
           <>
             <Link to="/dashboard"><FiGrid /> Dashboard</Link>
@@ -103,7 +105,8 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
             <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
-            <Route path="/extras" element={<Extras />} />
+          <Route path="/extras" element={<Extras />} />
+          <Route path="/users" element={<UsersPage />} />
           </Routes>
         </div>
       </BrowserRouter>
