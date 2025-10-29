@@ -37,6 +37,29 @@ export default function Extras() {
     const msg = lastErr?.response?.data?.error || lastErr?.message || 'Failed to remove suggestion'
     throw new Error(msg)
   }
+  async function removeSharedExpense(id) {
+    const eid = id
+    const attempts = [
+      () => api.delete(`/expenses/${eid}`),
+      () => api.delete('/expenses', { data: { id: eid } }),
+      () => api.post('/expenses/delete', { id: eid }),
+      () => api.post('/expenses/remove', { id: eid }),
+      () => api.delete(`/expenses/shared/${eid}`),
+      () => api.delete('/expenses/shared', { data: { id: eid } }),
+      () => api.post('/expenses/shared/delete', { id: eid }),
+      () => api.delete(`/admin/expenses/${eid}`),
+      () => api.delete('/admin/expenses', { data: { id: eid } }),
+      () => api.post('/admin/expenses/delete', { id: eid }),
+      () => api.delete(`/admin/expenses/shared/${eid}`),
+      () => api.post('/admin/expenses/shared/delete', { id: eid }),
+    ]
+    let lastErr
+    for (const fn of attempts) {
+      try { await fn(); return true } catch (e) { lastErr = e }
+    }
+    const msg = lastErr?.response?.data?.error || lastErr?.message || 'Failed to delete expense'
+    throw new Error(msg)
+  }
   const [title, setTitle] = useState('')
   const [forDate, setForDate] = useState('')
   // Expenses
@@ -191,10 +214,13 @@ export default function Extras() {
                     if(!confirm('Delete this shared expense?')) return
                     const id = e._id || e.id
                     if(!id) return alert('Missing id')
+                    // optimistic UI
+                    setSharedList(prev => prev.filter(x => (x._id||x.id) !== id))
                     try {
-                      await apiDeleteCascade([`/expenses/${id}`, `/admin/expenses/${id}`])
+                      await removeSharedExpense(id)
                     } catch (err) {
-                      alert(err?.response?.data?.error || 'Failed to delete expense')
+                      alert(err?.message || 'Failed to delete expense')
+                      await loadShared()
                       return
                     }
                     await loadShared()
