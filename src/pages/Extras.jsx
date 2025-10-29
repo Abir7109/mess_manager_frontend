@@ -14,6 +14,8 @@ export default function Extras() {
   const [shared, setShared] = useState(true)
   // Notifications
   const [notifs, setNotifs] = useState([])
+  // Shared expenses history
+  const [sharedList, setSharedList] = useState([])
 
   async function loadSuggestions() {
     const { data } = await api.get('/community/suggestions')
@@ -24,7 +26,7 @@ export default function Extras() {
     setNotifs(data)
   }
 
-  useEffect(() => { loadSuggestions(); loadNotifs() }, [])
+  useEffect(() => { loadSuggestions(); loadNotifs(); loadShared() }, [])
 
   async function addSuggestion(e) {
     e.preventDefault()
@@ -45,6 +47,18 @@ export default function Extras() {
     await api.post('/expenses', body)
     setAmount(''); setDesc('')
     alert('Expense saved')
+    await loadShared()
+  }
+
+  async function loadShared() {
+    try {
+      const now = new Date();
+      const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+      const r = await api.get('/expenses/shared',{ params:{ month } })
+      setSharedList(r.data.shared || [])
+    } catch {
+      setSharedList([])
+    }
   }
 
   return (
@@ -108,14 +122,14 @@ export default function Extras() {
               <tr><th>Date</th><th>By</th><th>Amount</th><th>Description</th><th>Participants</th><th>Actions</th></tr>
             </thead>
             <tbody>
-              {(await (async()=>{try{const r=await api.get('/expenses/shared',{params:{month}});return r.data.shared||[]}catch{return []}})()).map((e)=>(
+              {sharedList.map(e => (
                 <tr key={e._id}>
                   <td>{new Date(e.date).toLocaleDateString()}</td>
                   <td>{e.user?.name||'-'}</td>
                   <td>{e.amount}</td>
                   <td>{e.description||'-'}</td>
                   <td>{(e.participants||[]).map(p=>p.name).join(', ')}</td>
-                  <td>{user?.role==='admin' && <button className="btn" onClick={async()=>{await api.delete(`/expenses/${e._id}`);}}>Delete</button>}</td>
+                  <td>{user?.role==='admin' && <button className="btn" onClick={async()=>{await api.delete(`/expenses/${e._id}`); await loadShared()}}>Delete</button>}</td>
                 </tr>
               ))}
             </tbody>
