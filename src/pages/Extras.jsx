@@ -121,8 +121,9 @@ export default function Extras() {
       const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
       const r = await api.get('/expenses/shared',{ params:{ month } })
       setSharedList(r.data.shared || [])
-    } catch {
-      setSharedList([])
+    } catch (e) {
+      // preserve existing list on failure (e.g., 401 refresh or 404 route)
+      console.warn('Failed to load shared expenses', e?.response?.status || e)
     }
   }
 
@@ -149,10 +150,10 @@ export default function Extras() {
                   <button type="button" className="btn" onClick={() => toggleVote(s._id || s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
                   {user?.role==='admin' && <button type="button" className="btn" onClick={async()=>{
                     if(!confirm('Remove this suggestion?')) return
-                    const id = s._id || s.id
+                    const id = s.suggestionId || s._id || s.id
                     if(!id) return alert('Missing id')
                     // optimistic UI
-                    setSuggestions(prev => prev.filter(x => (x._id||x.id) !== id))
+                    setSuggestions(prev => prev.filter(x => (x.suggestionId||x._id||x.id) !== id))
                     try {
                       await removeSuggestion(id)
                     } catch (err) {
@@ -212,10 +213,10 @@ export default function Extras() {
                   <td>{(e.participants||[]).map(p=>p.name).join(', ')}</td>
                   <td>{user?.role==='admin' && <button type="button" className="btn" onClick={async()=>{
                     if(!confirm('Delete this shared expense?')) return
-                    const id = e._id || e.id
+                    const id = e.expenseId || e._id || e.id
                     if(!id) return alert('Missing id')
                     // optimistic UI
-                    setSharedList(prev => prev.filter(x => (x._id||x.id) !== id))
+                    setSharedList(prev => prev.filter(x => (x.expenseId||x._id||x.id) !== id))
                     try {
                       await removeSharedExpense(id)
                     } catch (err) {
