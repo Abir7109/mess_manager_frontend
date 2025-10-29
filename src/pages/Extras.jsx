@@ -129,7 +129,22 @@ export default function Extras() {
                   <td>{e.amount}</td>
                   <td>{e.description||'-'}</td>
                   <td>{(e.participants||[]).map(p=>p.name).join(', ')}</td>
-                  <td>{user?.role==='admin' && <button className="btn" onClick={async()=>{await api.delete(`/expenses/${e._id}`); await loadShared()}}>Delete</button>}</td>
+                  <td>{user?.role==='admin' && <button className="btn" onClick={async()=>{
+                    if(!confirm('Delete this shared expense?')) return
+                    const id = e._id || e.id
+                    if(!id) return alert('Missing id')
+                    try {
+                      await api.delete(`/expenses/${id}`)
+                    } catch (err) {
+                      const code = err?.response?.status
+                      if (code===404 || code===403) {
+                        await api.delete(`/admin/expenses/${id}`)
+                      } else {
+                        throw err
+                      }
+                    }
+                    await loadShared()
+                  }}>Delete</button>}</td>
                 </tr>
               ))}
             </tbody>
