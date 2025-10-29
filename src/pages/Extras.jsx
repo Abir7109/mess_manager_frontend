@@ -16,14 +16,19 @@ export default function Extras() {
   }
   async function removeSuggestion(id) {
     const sid = id
-    // Try multiple backends: DELETE and POST fallbacks
+    // Try multiple backends: DELETE (param), DELETE (body), POST fallbacks, alt paths
     const attempts = [
       () => api.delete(`/community/suggestions/${sid}`),
-      () => api.delete(`/admin/community/suggestions/${sid}`),
+      () => api.delete('/community/suggestions', { data: { id: sid } }),
       () => api.post('/community/suggestions/delete', { id: sid }),
+      () => api.post('/community/suggestions/remove', { id: sid }),
+      () => api.delete(`/admin/community/suggestions/${sid}`),
+      () => api.delete('/admin/community/suggestions', { data: { id: sid } }),
       () => api.post('/admin/community/suggestions/delete', { id: sid }),
-      () => api.delete(`/community/votes/${sid}`),
       () => api.post('/admin/community/suggestions/remove', { id: sid }),
+      () => api.delete(`/suggestions/${sid}`),
+      () => api.delete('/suggestions', { data: { id: sid } }),
+      () => api.post('/suggestions/delete', { id: sid }),
     ]
     let lastErr
     for (const fn of attempts) {
@@ -123,12 +128,17 @@ export default function Extras() {
                     if(!confirm('Remove this suggestion?')) return
                     const id = s._id || s.id
                     if(!id) return alert('Missing id')
+                    // optimistic UI
+                    setSuggestions(prev => prev.filter(x => (x._id||x.id) !== id))
                     try {
                       await removeSuggestion(id)
                     } catch (err) {
-                      alert(err?.message || err?.response?.data?.error || 'Failed to remove suggestion')
+                      alert(err?.message || 'Failed to remove suggestion')
+                      // reload to sync truth if backend rejected
+                      await loadSuggestions()
                       return
                     }
+                    // ensure list is fresh from server
                     await loadSuggestions()
                   }}>Remove</button>}
                 </div>
