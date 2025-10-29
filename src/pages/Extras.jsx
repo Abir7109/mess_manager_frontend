@@ -6,6 +6,14 @@ export default function Extras() {
   const { user } = useAuth()
   // Voting
   const [suggestions, setSuggestions] = useState([])
+  
+  async function apiDeleteCascade(paths = []) {
+    let lastErr
+    for (const p of paths) {
+      try { await api.delete(p); return true } catch (e) { lastErr = e }
+    }
+    throw lastErr
+  }
   const [title, setTitle] = useState('')
   const [forDate, setForDate] = useState('')
   // Expenses
@@ -38,14 +46,17 @@ export default function Extras() {
 
   async function toggleVote(id) {
     const sid = id
-    await api.post(`/community/suggestions/${sid}/vote`).catch(async (err) => {
+    try {
+      await api.post(`/community/suggestions/${sid}/vote`)
+    } catch (err) {
       const code = err?.response?.status
       if (code===404 || code===403) {
         await api.post(`/admin/community/suggestions/${sid}/vote`)
       } else {
+        alert(err?.response?.data?.error || 'Failed to vote')
         throw err
       }
-    })
+    }
     loadSuggestions()
   }
 
@@ -89,20 +100,16 @@ export default function Extras() {
                   <div style={{opacity:.8, fontSize:12}}>{s.forDate || ''}</div>
                 </div>
                 <div style={{display:'flex',gap:8}}>
-                  <button className="btn" onClick={() => toggleVote(s._id || s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
-                  {user?.role==='admin' && <button className="btn" onClick={async()=>{
+                  <button type="button" className="btn" onClick={() => toggleVote(s._id || s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
+                  {user?.role==='admin' && <button type="button" className="btn" onClick={async()=>{
                     if(!confirm('Remove this suggestion?')) return
                     const id = s._id || s.id
                     if(!id) return alert('Missing id')
                     try {
-                      await api.delete(`/community/suggestions/${id}`)
+                      await apiDeleteCascade([`/community/suggestions/${id}`, `/admin/community/suggestions/${id}`])
                     } catch (err) {
-                      const code = err?.response?.status
-                      if (code===404 || code===403) {
-                        await api.delete(`/admin/community/suggestions/${id}`)
-                      } else {
-                        throw err
-                      }
+                      alert(err?.response?.data?.error || 'Failed to remove suggestion')
+                      return
                     }
                     await loadSuggestions()
                   }}>Remove</button>}
@@ -152,19 +159,15 @@ export default function Extras() {
                   <td>{e.amount}</td>
                   <td>{e.description||'-'}</td>
                   <td>{(e.participants||[]).map(p=>p.name).join(', ')}</td>
-                  <td>{user?.role==='admin' && <button className="btn" onClick={async()=>{
+                  <td>{user?.role==='admin' && <button type="button" className="btn" onClick={async()=>{
                     if(!confirm('Delete this shared expense?')) return
                     const id = e._id || e.id
                     if(!id) return alert('Missing id')
                     try {
-                      await api.delete(`/expenses/${id}`)
+                      await apiDeleteCascade([`/expenses/${id}`, `/admin/expenses/${id}`])
                     } catch (err) {
-                      const code = err?.response?.status
-                      if (code===404 || code===403) {
-                        await api.delete(`/admin/expenses/${id}`)
-                      } else {
-                        throw err
-                      }
+                      alert(err?.response?.data?.error || 'Failed to delete expense')
+                      return
                     }
                     await loadShared()
                   }}>Delete</button>}</td>
