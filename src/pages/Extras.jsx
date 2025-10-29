@@ -43,7 +43,7 @@ export default function Extras() {
 
   async function addExpense(e) {
     e.preventDefault()
-    const body = { amount: Number(amount), description: desc, shared }
+    const body = { amount: Number(amount), description: desc, shared, splitMode: 'equal_all' }
     await api.post('/expenses', body)
     setAmount(''); setDesc('')
     alert('Expense saved')

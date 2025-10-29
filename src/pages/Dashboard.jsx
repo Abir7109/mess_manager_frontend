@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null)
   const [openProfile, setOpenProfile] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', photoUrl: '' })
+  const [sharedShare, setSharedShare] = useState(0)
 
   const dates = useMemo(() => {
     const start = dayjs(month + '-01')
@@ -63,7 +64,24 @@ export default function Dashboard() {
     setLogs(data)
     const s = await api.get('/meals/summary/mine', { params: { month } })
     setSummary(s.data)
-  })() }, [month])
+    // Load shared expenses for this month and compute my equal share
+    try {
+      const se = await api.get('/expenses/shared', { params: { month } })
+      const list = se.data.shared || []
+      const myId = user?.id || user?._id
+      const total = list.reduce((sum, e) => {
+        const participants = e.participants && e.participants.length ? e.participants : null
+        const count = participants ? participants.length : (e.totalParticipants || 0)
+        const am = Number(e.amount) || 0
+        if (!am || !count) return sum
+        const isMine = participants ? participants.some(p => (p.id||p._id) === myId) : true
+        return isMine ? sum + (am / count) : sum
+      }, 0)
+      setSharedShare(total)
+    } catch {
+      setSharedShare(0)
+    }
+  })() }, [month, user])
 
   useEffect(() => {
     if (user) setForm({ name: user.name || '', phone: user.phone || '', photoUrl: user.photoUrl || '' })
@@ -85,6 +103,7 @@ export default function Dashboard() {
   const daysInMonth = dates.length
   const meals = summary?.totalMeals || 0
   const spent = summary?.totalCost || 0
+  const totalOut = spent + (sharedShare || 0)
 
   return (
     <div className="container">
@@ -105,14 +124,19 @@ export default function Dashboard() {
               <GraphBar value={meals} max={daysInMonth} />
             </div>
             <div className="card" style={{ padding:12 }}>
-              <div className="label">Spent</div>
+              <div className="label">Meals Spent</div>
               <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={Math.round(spent)} prefix="৳" /></div>
               <div className="badge">Meal Cost: {summary?.mealCost}</div>
             </div>
             <div className="card" style={{ padding:12 }}>
-              <div className="label">Balance</div>
-              <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={Math.round(user?.balance || 0)} prefix="৳" /></div>
-              <GraphBar value={user?.balance || 0} max={Math.max(user?.balance || 0, spent || 1)} />
+              <div className="label">Shared Expenses (My Share)</div>
+              <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={Math.round(sharedShare)} prefix="৳" /></div>
+              <GraphBar value={sharedShare} max={Math.max(sharedShare || 1, spent || 1)} />
+            </div>
+            <div className="card" style={{ padding:12 }}>
+              <div className="label">Total Outflow</div>
+              <div style={{ fontSize:'1.8rem', fontWeight:800 }}><AnimatedNumber value={Math.round(totalOut)} prefix="৳" /></div>
+              <GraphBar value={totalOut} max={Math.max(totalOut || 1, (user?.balance||0) + totalOut)} />
             </div>
           </div>
 
