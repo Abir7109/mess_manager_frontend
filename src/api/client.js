@@ -35,6 +35,13 @@ export function getSavedRefreshToken() {
   try { return sessionStorage.getItem('MM_RT') } catch { return null }
 }
 
+export function toAbsoluteUrl(url) {
+  if (!url) return ''
+  if (/^https?:\/\//i.test(url)) return url
+  const base = api.defaults.baseURL?.replace(/\/api$/, '') || ''
+  return base + url
+}
+
 api.interceptors.request.use((config) => {
   if (!accessToken) {
     const at = getSavedAccessToken()

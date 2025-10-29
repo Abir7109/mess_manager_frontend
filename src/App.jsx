@@ -12,6 +12,7 @@ import UsersPage from './pages/Users'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GiCookingPot } from 'react-icons/gi'
 import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon, FiMenu, FiX, FiUsers } from 'react-icons/fi'
+import { FaInstagram, FaWhatsapp } from 'react-icons/fa'
 
 function Protected({ children, roles }) {
   const { user } = useAuth()
@@ -94,6 +95,22 @@ function NavBar() {
   )
 }
 
+function Footer() {
+  return (
+    <footer className="site-footer">
+      <div className="left">© {new Date().getFullYear()} Abir</div>
+      <div className="socials">
+        <a href="https://instagram.com/r_m_abir71" target="_blank" rel="noreferrer" aria-label="Instagram">
+          <FaInstagram /> <span>@r_m_abir71</span>
+        </a>
+        <a href="https://wa.me/8801919069898" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+          <FaWhatsapp /> <span>+8801919069898</span>
+        </a>
+      </div>
+    </footer>
+  )
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -109,6 +126,7 @@ function App() {
           <Route path="/extras" element={<Extras />} />
           <Route path="/users" element={<UsersPage />} />
           </Routes>
+          <Footer />
         </div>
       </BrowserRouter>
     </AuthProvider>
