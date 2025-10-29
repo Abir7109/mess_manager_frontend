@@ -14,6 +14,24 @@ export default function Extras() {
     }
     throw lastErr
   }
+  async function removeSuggestion(id) {
+    const sid = id
+    // Try multiple backends: DELETE and POST fallbacks
+    const attempts = [
+      () => api.delete(`/community/suggestions/${sid}`),
+      () => api.delete(`/admin/community/suggestions/${sid}`),
+      () => api.post('/community/suggestions/delete', { id: sid }),
+      () => api.post('/admin/community/suggestions/delete', { id: sid }),
+      () => api.delete(`/community/votes/${sid}`),
+      () => api.post('/admin/community/suggestions/remove', { id: sid }),
+    ]
+    let lastErr
+    for (const fn of attempts) {
+      try { await fn(); return true } catch (e) { lastErr = e }
+    }
+    const msg = lastErr?.response?.data?.error || lastErr?.message || 'Failed to remove suggestion'
+    throw new Error(msg)
+  }
   const [title, setTitle] = useState('')
   const [forDate, setForDate] = useState('')
   // Expenses
@@ -106,9 +124,9 @@ export default function Extras() {
                     const id = s._id || s.id
                     if(!id) return alert('Missing id')
                     try {
-                      await apiDeleteCascade([`/community/suggestions/${id}`, `/admin/community/suggestions/${id}`])
+                      await removeSuggestion(id)
                     } catch (err) {
-                      alert(err?.response?.data?.error || 'Failed to remove suggestion')
+                      alert(err?.message || err?.response?.data?.error || 'Failed to remove suggestion')
                       return
                     }
                     await loadSuggestions()
