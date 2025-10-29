@@ -142,6 +142,15 @@ body {
 :root.dark .glass, :root.dark .glass h1, :root.dark .glass h2, :root.dark .glass h3, :root.dark .glass h4, :root.dark .glass p { color: #0b0b0b; }
 :root.dark .tile a, :root.dark .glass a { color: #23443b; }
 
+/* Force description-like text dark on all light surfaces in dark mode */
+:root.dark .card,
+:root.dark .card p,
+:root.dark .card .label,
+:root.dark .badge,
+:root.dark .table th,
+:root.dark .table td { color: #0b0b0b; }
+:root.dark .card a { color: #23443b; }
+
 /* Calendar */
 .calendar-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 8px; }
 .calendar { display:grid; grid-template-columns: repeat(7, 1fr); gap:8px; min-width: 560px; }
