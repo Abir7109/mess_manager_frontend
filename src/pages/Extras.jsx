@@ -66,7 +66,10 @@ export default function Extras() {
                   <div style={{fontWeight:800}}>{s.title}</div>
                   <div style={{opacity:.8, fontSize:12}}>{s.forDate || ''}</div>
                 </div>
-                <button className="btn" onClick={() => toggleVote(s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
+                <div style={{display:'flex',gap:8}}>
+                  <button className="btn" onClick={() => toggleVote(s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
+                  {user?.role==='admin' && <button className="btn" onClick={async()=>{ await api.delete(`/community/suggestions/${s.id}`); loadSuggestions() }}>Remove</button>}
+                </div>
               </div>
             ))}
           </div>
@@ -91,9 +94,33 @@ export default function Extras() {
         <h2 style={{marginTop:0}}>Notifications</h2>
         {notifs.length === 0 ? <p>No alerts 🎉</p> : (
           <ul>
-            {notifs.map((n, i) => <li key={i}>{n.message}</li>)}
+            {notifs.map((n, i) => <li key={i}>{n.message} {n.type==='low_balance' && <span className="desc">— To recharge, contact an admin (Admins can update balances in Users).</span>}</li>)}
           </ul>
         )}
+      </div>
+
+      <div className="card" style={{marginTop:16}}>
+        <h3 style={{marginTop:0}}>Shared expenses (this month)</h3>
+        <p className="desc">History of shared expenses. Admins can delete entries.</p>
+        <div className="scroll-x">
+          <table className="table wide">
+            <thead>
+              <tr><th>Date</th><th>By</th><th>Amount</th><th>Description</th><th>Participants</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {(await (async()=>{try{const r=await api.get('/expenses/shared',{params:{month}});return r.data.shared||[]}catch{return []}})()).map((e)=>(
+                <tr key={e._id}>
+                  <td>{new Date(e.date).toLocaleDateString()}</td>
+                  <td>{e.user?.name||'-'}</td>
+                  <td>{e.amount}</td>
+                  <td>{e.description||'-'}</td>
+                  <td>{(e.participants||[]).map(p=>p.name).join(', ')}</td>
+                  <td>{user?.role==='admin' && <button className="btn" onClick={async()=>{await api.delete(`/expenses/${e._id}`);}}>Delete</button>}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
