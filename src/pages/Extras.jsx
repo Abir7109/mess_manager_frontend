@@ -37,7 +37,15 @@ export default function Extras() {
   }
 
   async function toggleVote(id) {
-    await api.post(`/community/suggestions/${id}/vote`)
+    const sid = id
+    await api.post(`/community/suggestions/${sid}/vote`).catch(async (err) => {
+      const code = err?.response?.status
+      if (code===404 || code===403) {
+        await api.post(`/admin/community/suggestions/${sid}/vote`)
+      } else {
+        throw err
+      }
+    })
     loadSuggestions()
   }
 
@@ -81,8 +89,23 @@ export default function Extras() {
                   <div style={{opacity:.8, fontSize:12}}>{s.forDate || ''}</div>
                 </div>
                 <div style={{display:'flex',gap:8}}>
-                  <button className="btn" onClick={() => toggleVote(s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
-                  {user?.role==='admin' && <button className="btn" onClick={async()=>{ await api.delete(`/community/suggestions/${s.id}`); loadSuggestions() }}>Remove</button>}
+                  <button className="btn" onClick={() => toggleVote(s._id || s.id)}>{s.voted ? 'Unvote' : 'Vote'} ({s.votes})</button>
+                  {user?.role==='admin' && <button className="btn" onClick={async()=>{
+                    if(!confirm('Remove this suggestion?')) return
+                    const id = s._id || s.id
+                    if(!id) return alert('Missing id')
+                    try {
+                      await api.delete(`/community/suggestions/${id}`)
+                    } catch (err) {
+                      const code = err?.response?.status
+                      if (code===404 || code===403) {
+                        await api.delete(`/admin/community/suggestions/${id}`)
+                      } else {
+                        throw err
+                      }
+                    }
+                    await loadSuggestions()
+                  }}>Remove</button>}
                 </div>
               </div>
             ))}
