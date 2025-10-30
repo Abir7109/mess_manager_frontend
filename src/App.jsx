@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom'
 import { useState, useEffect, lazy, Suspense, useMemo } from 'react'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import './theme.css'
@@ -123,7 +123,7 @@ function App() {
   return (
     <AuthProvider>
       <MotionConfig reducedMotion={reduced}>
-        <BrowserRouter basename={import.meta.env.BASE_URL}>
+        <Router>
           <NavBar />
           <div className="page-blur">
             <Suspense fallback={<div style={{padding:24}}>Loading…</div>}>
@@ -139,7 +139,7 @@ function App() {
             </Suspense>
             <Footer />
           </div>
-        </BrowserRouter>
+        </Router>
       </MotionConfig>
     </AuthProvider>
   )
