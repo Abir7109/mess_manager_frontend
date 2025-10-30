@@ -9,6 +9,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Admin = lazy(() => import('./pages/Admin'))
 const Extras = lazy(() => import('./pages/Extras'))
 const UsersPage = lazy(() => import('./pages/Users'))
+const PriceTest = lazy(() => import('./pages/PriceTest'))
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GiCookingPot } from 'react-icons/gi'
 import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon, FiMenu, FiX, FiUsers } from 'react-icons/fi'
@@ -135,6 +136,7 @@ function App() {
                 <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
                 <Route path="/extras" element={<Extras />} />
                 <Route path="/users" element={<UsersPage />} />
+                <Route path="/price-test" element={<PriceTest />} />
               </Routes>
             </Suspense>
             <Footer />
