@@ -49,11 +49,12 @@ export default function MealPriceChart({ month, refresh = 0 }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    animation: false,
     interaction: { mode: 'index', intersect: false },
     plugins: { legend: { display: true, labels: { boxWidth: 12 } }, tooltip: { enabled: true } },
     scales: {
-      x: { grid: { display: true, color: 'rgba(255,255,255,0.08)' }, ticks: { autoSkip: true, maxTicksLimit: 10 } },
-      y: { beginAtZero: true, grid: { display: true, color: 'rgba(255,255,255,0.12)' } }
+      x: { grid: { display: true, color: 'rgba(127,127,127,0.25)' }, ticks: { autoSkip: true, maxTicksLimit: 10 } },
+      y: { beginAtZero: true, grid: { display: true, color: 'rgba(127,127,127,0.35)' } }
     }
   }
 

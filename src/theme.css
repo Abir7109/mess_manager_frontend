@@ -217,7 +217,7 @@ body {
   .steam-wrap { display: none; }
 }
 
-/* Containment hints to limit repaint/reflow */
-.card, .tile, .calendar, .mobile-menu { contain: content; content-visibility: auto; contain-intrinsic-size: 300px 200px; }
+/* Containment hints to limit repaint/reflow (avoid content-visibility to ensure charts render) */
+.card, .tile, .calendar, .mobile-menu { contain: content; }
 /* Ensure charts measure correctly */
-.chart-wrap { content-visibility: visible; contain: none; }
+.chart-wrap { contain: none; }
