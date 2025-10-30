@@ -1,6 +1,5 @@
 import dayjs from 'dayjs'
-import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useEffect, useMemo, useState, memo } from 'react'
 import api from '../api/client'
 import viteLogo from '/vite.svg'
 import { useAuth } from '../context/AuthContext'
@@ -10,37 +9,35 @@ import GraphBar from '../components/GraphBar'
 import MealPriceChart from '../components/MealPriceChart'
 import { LuSunrise, LuMoon } from 'react-icons/lu'
 
-function DayCell({ date, log, onChange, editable }) {
+const DayCell = memo(function DayCell({ date, log, onChange, editable }) {
   const [b, setB] = useState(!!log?.breakfast)
   const [d, setD] = useState(!!log?.dinner)
   useEffect(() => { setB(!!log?.breakfast); setD(!!log?.dinner) }, [log])
   async function save(next) { if (editable) await onChange(date, next) }
   const cls = `day${b ? ' with-b' : ''}${d ? ' with-d' : ''}`
   return (
-    <motion.div className={cls} whileHover={{ y: -2 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}>
+    <div className={cls}>
       <div className="hint">{b ? 'B✓' : 'B✕'} • {d ? 'D✓' : 'D✕'}</div>
       <h4>{dayjs(date).format('D ddd')}</h4>
       <div className="meal-toggles">
-        <motion.button
-          whileTap={{ scale: 0.96 }}
+        <button
           className={`chip b ${b ? 'on' : 'off'}`}
           aria-pressed={b}
           disabled={!editable}
           onClick={() => { if (!editable) return; const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
           <LuSunrise /> <span className="txt">Breakfast</span>
-        </motion.button>
-        <motion.button
-          whileTap={{ scale: 0.96 }}
+        </button>
+        <button
           className={`chip d ${d ? 'on' : 'off'}`}
           aria-pressed={d}
           disabled={!editable}
           onClick={() => { if (!editable) return; const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
           <LuMoon /> <span className="txt">Dinner</span>
-        </motion.button>
+        </button>
       </div>
-    </motion.div>
+    </div>
   )
-}
+})
 
 export default function Dashboard() {
   const { user, updateProfile } = useAuth()

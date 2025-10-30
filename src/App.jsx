@@ -1,15 +1,14 @@
 import { BrowserRouter, Routes, Route, Navigate, Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, lazy, Suspense, useMemo } from 'react'
+import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import './theme.css'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import Forgot from './pages/Forgot'
-import Dashboard from './pages/Dashboard'
-import Admin from './pages/Admin'
-import Extras from './pages/Extras'
-import UsersPage from './pages/Users'
+const Home = lazy(() => import('./pages/Home'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Admin = lazy(() => import('./pages/Admin'))
+const Extras = lazy(() => import('./pages/Extras'))
+const UsersPage = lazy(() => import('./pages/Users'))
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { GiCookingPot } from 'react-icons/gi'
 import { FiHome, FiLogIn, FiUserPlus, FiGrid, FiShield, FiSun, FiMoon, FiMenu, FiX, FiUsers } from 'react-icons/fi'
@@ -113,24 +112,35 @@ function Footer() {
 }
 
 function App() {
+  const reduced = useMemo(() => {
+    if (typeof window === 'undefined') return 'never'
+    const isSmall = window.matchMedia && window.matchMedia('(max-width: 768px)').matches
+    const prefers = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const ua = navigator.userAgent || ''
+    const isAndroid = /Android/i.test(ua)
+    return (isSmall || prefers || isAndroid) ? 'always' : 'user'
+  }, [])
   return (
     <AuthProvider>
-      <BrowserRouter basename={import.meta.env.BASE_URL}>
-        <NavBar />
-        <div className="page-blur">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot" element={<Forgot />} />
-            <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
-            <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
-          <Route path="/extras" element={<Extras />} />
-          <Route path="/users" element={<UsersPage />} />
-          </Routes>
-          <Footer />
-        </div>
-      </BrowserRouter>
+      <MotionConfig reducedMotion={reduced}>
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
+          <NavBar />
+          <div className="page-blur">
+            <Suspense fallback={<div style={{padding:24}}>Loading…</div>}>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+                <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
+                <Route path="/extras" element={<Extras />} />
+                <Route path="/users" element={<UsersPage />} />
+              </Routes>
+            </Suspense>
+            <Footer />
+          </div>
+        </BrowserRouter>
+      </MotionConfig>
     </AuthProvider>
   )
 }
