@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import { useEffect, useMemo, useState, memo } from 'react'
+import { motion } from 'framer-motion'
 import api from '../api/client'
 import viteLogo from '/vite.svg'
 import { useAuth } from '../context/AuthContext'
