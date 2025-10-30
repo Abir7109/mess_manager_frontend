@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext'
 import Modal from '../components/Modal'
 import AnimatedNumber from '../components/AnimatedNumber'
 import GraphBar from '../components/GraphBar'
+import MealPriceChart from '../components/MealPriceChart'
 import { LuSunrise, LuMoon } from 'react-icons/lu'
 
 function DayCell({ date, log, onChange, editable }) {
@@ -158,6 +159,14 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
+
+      <motion.div className="card glass" style={{marginTop:16}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <h3 style={{margin:0}}>Meal Price — {dayjs(month+'-01').format('MMMM YYYY')}</h3>
+          <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} style={{maxWidth:160}} />
+        </div>
+        <MealPriceChart month={month} />
+      </motion.div>
 
       <motion.div className="card glass" style={{marginTop:16}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <h3>Meals</h3>
