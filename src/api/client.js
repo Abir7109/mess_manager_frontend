@@ -51,23 +51,34 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Refresh flow using header refresh token (no cookies)
+// Refresh flow using header refresh token (no cookies) with de-dupe
+let refreshInFlight = null
 api.interceptors.response.use(
   r => r,
   async (error) => {
     const original = error.config || {}
-    if (error.response && error.response.status === 401 && !original._retry) {
+    const status = error?.response?.status
+    const url = original?.url || ''
+    if (status === 401 && !original._retry && !url.includes('/auth/refresh')) {
       original._retry = true
       try {
         if (!refreshToken) refreshToken = getSavedRefreshToken()
-        if (!refreshToken) throw new Error('no refresh token')
-        const { data } = await api.post('/auth/refresh', {}, { headers: { Authorization: `Bearer ${refreshToken}` } })
-        setAccessToken(data.accessToken)
+        if (!refreshToken) {
+          setAccessToken(null); setRefreshToken(null)
+          return Promise.reject(error)
+        }
+        if (!refreshInFlight) {
+          refreshInFlight = api.post('/auth/refresh', {}, { headers: { Authorization: `Bearer ${refreshToken}` } })
+            .then(({ data }) => { setAccessToken(data.accessToken); return data.accessToken })
+            .catch((e) => { setAccessToken(null); setRefreshToken(null); throw e })
+            .finally(() => { refreshInFlight = null })
+        }
+        const token = await refreshInFlight
         original.headers = original.headers || {}
-        original.headers.Authorization = `Bearer ${data.accessToken}`
+        original.headers.Authorization = `Bearer ${token}`
         return api(original)
       } catch (e) {
-        setAccessToken(null); setRefreshToken(null)
+        // fallthrough: let the original 401 propagate
       }
     }
     return Promise.reject(error)
