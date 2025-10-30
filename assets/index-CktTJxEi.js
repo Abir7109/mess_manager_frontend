@@ -1,4 +1,4 @@
-import{r as st,j as $s}from"./index-COs3iB4K.js";/*!
+import{r as st,j as $s}from"./index-vcGGyp0O.js";/*!
  * @kurkle/color v0.3.4
  * https://github.com/kurkle/color#readme
  * (c) 2024 Jukka Kurkela
