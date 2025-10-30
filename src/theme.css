@@ -219,3 +219,5 @@ body {
 
 /* Containment hints to limit repaint/reflow */
 .card, .tile, .calendar, .mobile-menu { contain: content; content-visibility: auto; contain-intrinsic-size: 300px 200px; }
+/* Ensure charts measure correctly */
+.chart-wrap { content-visibility: visible; contain: none; }

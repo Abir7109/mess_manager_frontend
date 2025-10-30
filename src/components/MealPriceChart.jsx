@@ -59,7 +59,7 @@ export default function MealPriceChart({ month, refresh = 0 }) {
 
   return (
     <div className="scroll-x">
-      <div style={{ minWidth: 320, width: '100%', height: 260 }}>
+      <div className="chart-wrap" style={{ minWidth: 320, width: '100%', height: 260 }}>
         <Line options={options} data={data} />
       </div>
     </div>
