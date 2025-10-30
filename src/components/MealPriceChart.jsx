@@ -15,7 +15,7 @@ import {
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend, Filler)
 
-export default function MealPriceChart({ month }) {
+export default function MealPriceChart({ month, refresh = 0 }) {
   const [labels, setLabels] = useState([])
   const [values, setValues] = useState([])
 
@@ -29,7 +29,7 @@ export default function MealPriceChart({ month }) {
         setLabels([]); setValues([])
       }
     })()
-  }, [month])
+  }, [month, refresh])
 
   const data = {
     labels,

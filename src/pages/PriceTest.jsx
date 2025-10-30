@@ -10,6 +10,7 @@ export default function PriceTest() {
   const [value, setValue] = useState('')
   const [msg, setMsg] = useState('')
   const [err, setErr] = useState('')
+  const [refresh, setRefresh] = useState(0)
   const { user } = useAuth()
 
   async function applyChange() {
@@ -18,6 +19,7 @@ export default function PriceTest() {
       await api.post('/admin/price-change', { value: Number(value), date })
       setMsg('Saved!');
       const m = date.slice(0,7); if (m !== month) setMonth(m);
+      setRefresh(r=>r+1)
     } catch (e) {
       setErr(e?.response?.data?.error || 'Failed')
     }
@@ -62,7 +64,7 @@ export default function PriceTest() {
           </div>
         </div>
         <div style={{marginTop:12}}>
-          <MealPriceChart month={month} />
+          <MealPriceChart month={month} refresh={refresh} />
         </div>
       </div>
     </div>
