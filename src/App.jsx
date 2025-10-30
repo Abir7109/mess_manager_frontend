@@ -5,6 +5,7 @@ import './theme.css'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import Forgot from './pages/Forgot'
 import Dashboard from './pages/Dashboard'
 import Admin from './pages/Admin'
 import Extras from './pages/Extras'
@@ -121,6 +122,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot" element={<Forgot />} />
             <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
             <Route path="/admin" element={<Protected roles={["admin"]}><Admin /></Protected>} />
           <Route path="/extras" element={<Extras />} />

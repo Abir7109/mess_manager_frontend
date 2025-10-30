@@ -22,8 +22,8 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function register(name, email, password) {
-    await api.post('/auth/register', { name, email, password })
+  async function register(name, email, password, recoveryType, recoveryAnswer) {
+    await api.post('/auth/register', { name, email, password, recoveryType, recoveryAnswer })
     return login(email, password)
   }
 

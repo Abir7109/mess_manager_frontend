@@ -35,6 +35,9 @@ export default function Login() {
           <label className="label">Password</label>
           <input className="input" type="password" value={password} onChange={e=>setPassword(e.target.value)} required />
           <button className="btn" disabled={loading}>{loading ? 'Signing in...' : 'Login'}</button>
+          <div style={{marginTop:8}}>
+            <a href="#/forgot" onClick={(e)=>{e.preventDefault(); nav('/forgot')}}>Forgot password?</a>
+          </div>
         </form>
       </div>
     </div>
