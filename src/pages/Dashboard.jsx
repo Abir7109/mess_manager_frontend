@@ -49,6 +49,12 @@ export default function Dashboard() {
   const [openProfile, setOpenProfile] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', photoUrl: '' })
   const [sharedShare, setSharedShare] = useState(0)
+  // Meal price testing controls (admin only)
+  const [priceDate, setPriceDate] = useState(dayjs().format('YYYY-MM-DD'))
+  const [priceValue, setPriceValue] = useState('')
+  const [priceMsg, setPriceMsg] = useState('')
+  const [priceErr, setPriceErr] = useState('')
+  const [priceRefresh, setPriceRefresh] = useState(0)
 
   const dates = useMemo(() => {
     const start = dayjs(month + '-01')
@@ -159,11 +165,40 @@ export default function Dashboard() {
       </div>
 
       <motion.div className="card glass" style={{marginTop:16}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap'}}>
           <h3 style={{margin:0}}>Meal Price — {dayjs(month+'-01').format('MMMM YYYY')}</h3>
-          <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} style={{maxWidth:160}} />
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <label className="label" style={{marginRight:6}}>Month</label>
+            <input className="input" type="month" value={month} onChange={e=>setMonth(e.target.value)} style={{maxWidth:160}} />
+          </div>
         </div>
-        <MealPriceChart month={month} />
+        {isAdmin && (
+          <div style={{marginTop:10}}>
+            <label className="label">Set price on a date</label>
+            <div className="grid" style={{gridTemplateColumns:'1fr 1fr auto', gap:8}}>
+              <input className="input" type="date" value={priceDate} onChange={e=>setPriceDate(e.target.value)} />
+              <input className="input" type="number" placeholder="meal price (৳)" value={priceValue} onChange={e=>setPriceValue(e.target.value)} />
+              <button className="btn teal" onClick={async()=>{
+                setPriceMsg(''); setPriceErr('');
+                try {
+                  await api.post('/admin/price-change', { value: Number(priceValue), date: priceDate })
+                  setPriceMsg('Saved');
+                  const m = priceDate.slice(0,7); if (m !== month) setMonth(m);
+                  setPriceRefresh(r=>r+1);
+                } catch (e) {
+                  setPriceErr(e?.response?.data?.error || 'Failed');
+                }
+              }}>Apply</button>
+            </div>
+            <div style={{display:'flex',gap:8,marginTop:6}}>
+              <button className="btn" onClick={()=>setPriceDate(dayjs(priceDate).subtract(1,'day').format('YYYY-MM-DD'))}>-1 day</button>
+              <button className="btn" onClick={()=>setPriceDate(dayjs(priceDate).add(1,'day').format('YYYY-MM-DD'))}>+1 day</button>
+            </div>
+            {priceErr && <p style={{color:'crimson'}}>{priceErr}</p>}
+            {priceMsg && <p style={{color:'seagreen'}}>{priceMsg}</p>}
+          </div>
+        )}
+        <MealPriceChart month={month} refresh={priceRefresh} />
       </motion.div>
 
       <motion.div className="card glass" style={{marginTop:16}} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
