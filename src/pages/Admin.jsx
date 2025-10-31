@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import api, { toAbsoluteUrl } from '../api/client'
+import api, { toAbsoluteUrl, getSavedAccessToken } from '../api/client'
 import { Bar, Doughnut } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -75,7 +75,9 @@ export default function Admin() {
   }
 
   function downloadPDF() {
-    const url = toAbsoluteUrl(`/api/admin/pdf?month=${month}`)
+    const at = getSavedAccessToken()
+    const tokenPart = at ? `&access_token=${encodeURIComponent(at)}` : ''
+    const url = toAbsoluteUrl(`/api/admin/pdf?month=${month}${tokenPart}`)
     window.open(url, '_blank')
   }
 
