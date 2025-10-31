@@ -281,7 +281,7 @@ export default function Admin() {
                         <input type="checkbox" checked={!!l.dinner} onChange={e=>toggleMeal(editMealsUser._id||editMealsUser.id, l.date, 'dinner', e.target.checked)} />
                       </td>
                       <td>
-                        <input className=\"input\" style={{maxWidth:100}} type=\"number\" step=\"0.01\" placeholder=\"auto\" value={l.overrideCount ?? ''}
+                        <input className="input" style={{maxWidth:100}} type="number" step="0.01" placeholder="auto" value={l.overrideCount ?? ''}
                           onChange={async (e)=>{
                             const val = e.target.value
                             await api.post('/admin/meals/upsert', { userId: editMealsUser._id||editMealsUser.id, date: l.date, overrideCount: val === '' ? '' : Number(val) })
@@ -290,11 +290,11 @@ export default function Admin() {
                       </td>
                       <td>
                         <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, -1)}>-1</button>
-                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, -0.5)}>-0.5</button>
-                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, 0.5)}>+0.5</button>
-                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, 1)}>+1</button>
-                          <button className=\"btn\" onClick={async()=>{ await api.post('/admin/meals/upsert', { userId: editMealsUser._id||editMealsUser.id, date: l.date, overrideCount: '' }); await loadMeals(editMealsUser._id||editMealsUser.id, editMealsMonth) }}>Clear</button>
+                          <button className="btn" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, -1)}>-1</button>
+                          <button className="btn" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, -0.5)}>-0.5</button>
+                          <button className="btn" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, 0.5)}>+0.5</button>
+                          <button className="btn" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, 1)}>+1</button>
+                          <button className="btn" onClick={async()=>{ await api.post('/admin/meals/upsert', { userId: editMealsUser._id||editMealsUser.id, date: l.date, overrideCount: '' }); await loadMeals(editMealsUser._id||editMealsUser.id, editMealsMonth) }}>Clear</button>
                         </div>
                       </td>
                     </tr>
