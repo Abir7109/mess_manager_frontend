@@ -73,6 +73,23 @@ export default function Admin() {
     await api.post('/admin/meals/upsert', { userId, date, [key]: value })
     await loadMeals(userId, editMealsMonth)
   }
+  function dailyCount(log) {
+    const b = !!log?.breakfast, d = !!log?.dinner
+    if (typeof log?.overrideCount === 'number') return Number(log.overrideCount)
+    switch (countingRule) {
+      case 'perMeal': return (b?1:0)+(d?1:0)
+      case 'perMealHalf': return (b?0.5:0)+(d?0.5:0)
+      case 'anyMealIsOne': return (b||d)?1:0
+      case 'bothEqualsOne':
+      default: return (b&&d)?1:0
+    }
+  }
+  async function adjustMeals(userId, log, delta) {
+    const base = Number(dailyCount(log) || 0)
+    const next = Math.max(0, Math.round((base + delta) * 100)/100)
+    await api.post('/admin/meals/upsert', { userId, date: log.date, overrideCount: next })
+    await loadMeals(userId, editMealsMonth)
+  }
 
   async function downloadPDF() {
     try {
@@ -251,7 +268,7 @@ export default function Admin() {
             <div className="scroll-x">
               <table className="table wide">
                 <thead>
-                  <tr><th>Date</th><th>Breakfast</th><th>Dinner</th><th>Override (meals)</th></tr>
+                  <tr><th>Date</th><th>Breakfast</th><th>Dinner</th><th>Override (meals)</th><th>Adjust</th></tr>
                 </thead>
                 <tbody>
                   {editMealsLogs.map(l => (
@@ -264,12 +281,21 @@ export default function Admin() {
                         <input type="checkbox" checked={!!l.dinner} onChange={e=>toggleMeal(editMealsUser._id||editMealsUser.id, l.date, 'dinner', e.target.checked)} />
                       </td>
                       <td>
-                        <input className="input" style={{maxWidth:100}} type="number" step="0.01" placeholder="auto" value={l.overrideCount ?? ''}
+                        <input className=\"input\" style={{maxWidth:100}} type=\"number\" step=\"0.01\" placeholder=\"auto\" value={l.overrideCount ?? ''}
                           onChange={async (e)=>{
                             const val = e.target.value
                             await api.post('/admin/meals/upsert', { userId: editMealsUser._id||editMealsUser.id, date: l.date, overrideCount: val === '' ? '' : Number(val) })
                             await loadMeals(editMealsUser._id||editMealsUser.id, editMealsMonth)
                           }} />
+                      </td>
+                      <td>
+                        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, -1)}>-1</button>
+                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, -0.5)}>-0.5</button>
+                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, 0.5)}>+0.5</button>
+                          <button className=\"btn\" onClick={()=>adjustMeals(editMealsUser._id||editMealsUser.id, l, 1)}>+1</button>
+                          <button className=\"btn\" onClick={async()=>{ await api.post('/admin/meals/upsert', { userId: editMealsUser._id||editMealsUser.id, date: l.date, overrideCount: '' }); await loadMeals(editMealsUser._id||editMealsUser.id, editMealsMonth) }}>Clear</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
