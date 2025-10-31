@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
-import api from '../api/client'
+import api, { toAbsoluteUrl } from '../api/client'
 import { Bar, Doughnut } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -75,7 +75,7 @@ export default function Admin() {
   }
 
   function downloadPDF() {
-    const url = `${import.meta.env.VITE_API_URL}/api/admin/pdf?month=${month}`
+    const url = toAbsoluteUrl(`/api/admin/pdf?month=${month}`)
     window.open(url, '_blank')
   }
 
