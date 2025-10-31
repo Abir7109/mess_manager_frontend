@@ -69,6 +69,11 @@ export default function Dashboard() {
       const list = se.data.shared || []
       const myId = user?.id || user?._id
       const total = list.reduce((sum, e) => {
+        // Avoid double-counting expenses that are already included in the meal cost calculation.
+        // Heuristics:
+        //  - If backend marks splitMode === 'equal_all', treat it as meal-fund (groceries) => exclude from separate shared share.
+        //  - If backend flags appliesToMeals === true, also exclude.
+        if (e?.splitMode === 'equal_all' || e?.appliesToMeals === true) return sum
         const participants = e.participants && e.participants.length ? e.participants : null
         const count = participants ? participants.length : (e.totalParticipants || 0)
         const am = Number(e.amount) || 0
