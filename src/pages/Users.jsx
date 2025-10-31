@@ -46,8 +46,21 @@ export default function UsersPage() {
   }
   useEffect(() => { load() }, [month])
 
+  function buildMonthDays(m, logs=[]) {
+    const start = dayjs(m + '-01');
+    const end = start.endOf('month');
+    const map = new Map((logs||[]).map(l => [l.date, l]));
+    const days = [];
+    for (let d = start; d.isBefore(end) || d.isSame(end, 'day'); d = d.add(1, 'day')) {
+      const key = d.format('YYYY-MM-DD');
+      days.push({ date: key, breakfast: !!map.get(key)?.breakfast, dinner: !!map.get(key)?.dinner, overrideCount: map.get(key)?.overrideCount });
+    }
+    return days;
+  }
+
   async function openDetail(u) {
     setSelected(u)
+    setAdminMealsMonth(month)
     // show basic info immediately
     setDetail({ month, user: { id: u.id, name: u.name, email: u.email, phone: u.phone, photoUrl: u.photoUrl, balance: u.balance }, totalMeals: u.totalMeals||0, totalCost: u.totalCost||0, mealCost: 0, logs: [] })
     try {
@@ -62,6 +75,17 @@ export default function UsersPage() {
         } catch (err2) {
           // keep basic detail; optionally attach message
         }
+      }
+    }
+    // load admin meals grid even if no logs exist
+    if (isAdmin) {
+      // Pre-populate with a full month grid so the editor never appears empty
+      setAdminMealsLogs(buildMonthDays(month, []))
+      try {
+        const res = await api.get('/admin/meals', { params: { userId: u.id, month } })
+        setAdminMealsLogs(buildMonthDays(month, res.data.logs||[]))
+      } catch (e) {
+        // Keep the pre-populated grid on error
       }
     }
   }
@@ -173,7 +197,7 @@ export default function UsersPage() {
                 <div className="card" style={{marginTop:12}}>
                   <h4 style={{marginTop:0}}>Meals editor</h4>
                   <label className="label">Month</label>
-                  <input className="input" type="month" value={adminMealsMonth} onChange={async e=>{ setAdminMealsMonth(e.target.value); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: e.target.value } }); setAdminMealsLogs(res.data.logs||[]) }} />
+                  <input className="input" type="month" value={adminMealsMonth} onChange={async e=>{ const m = e.target.value; const uid = detail?.user?.id || selected?.id; setAdminMealsMonth(m); setAdminMealsLogs(buildMonthDays(m, [])); try { const res = await api.get('/admin/meals', { params: { userId: uid, month: m } }); setAdminMealsLogs(buildMonthDays(m, res.data.logs||[])) } catch {} }} />
                   <div className="scroll-x" style={{marginTop:8}}>
                     <table className="table wide">
                       <thead><tr><th>Date</th><th>Breakfast</th><th>Dinner</th><th>Override (meals)</th><th>Adjust</th></tr></thead>
@@ -181,24 +205,24 @@ export default function UsersPage() {
                         {adminMealsLogs.map(l => (
                           <tr key={l._id||l.date}>
                             <td>{l.date}</td>
-                            <td><input type="checkbox" checked={!!l.breakfast} onChange={async e=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, breakfast: e.target.checked, dinner: l.dinner }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }} /></td>
-                            <td><input type="checkbox" checked={!!l.dinner} onChange={async e=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, dinner: e.target.checked, breakfast: l.breakfast }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }} /></td>
+                            <td><input type="checkbox" checked={!!l.breakfast} onChange={async e=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, breakfast: e.target.checked, dinner: l.dinner }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }} /></td>
+                            <td><input type="checkbox" checked={!!l.dinner} onChange={async e=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, dinner: e.target.checked, breakfast: l.breakfast }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }} /></td>
                             <td>
                               <input className="input" style={{maxWidth:100}} type="number" step="0.01" placeholder="auto" value={l.overrideCount ?? ''}
                                 onChange={async (e)=>{
                                   const val = e.target.value
                                   await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: val === '' ? '' : Number(val) })
                                   const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } })
-                                  setAdminMealsLogs(res.data.logs||[])
+                                  setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[]))
                                 }} />
                             </td>
                             <td>
                               <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base - 1) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }}>-1</button>
-                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base - 0.5) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }}>-0.5</button>
-                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base + 0.5) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }}>+0.5</button>
-                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base + 1) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }}>+1</button>
-                                <button className="btn" onClick={async()=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: '' }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(res.data.logs||[]) }}>Clear</button>
+                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base - 1) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }}>-1</button>
+                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base - 0.5) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }}>-0.5</button>
+                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base + 0.5) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }}>+0.5</button>
+                                <button className="btn" onClick={async()=>{ const base = typeof l.overrideCount==='number' ? Number(l.overrideCount) : ((l.breakfast?0.5:0)+(l.dinner?0.5:0)); const next = Math.max(0, Math.round((base + 1) * 100)/100); await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: next }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }}>+1</button>
+                                <button className="btn" onClick={async()=>{ await api.post('/admin/meals/upsert', { userId: detail.user.id, date: l.date, overrideCount: '' }); const res = await api.get('/admin/meals', { params: { userId: detail.user.id, month: adminMealsMonth } }); setAdminMealsLogs(buildMonthDays(adminMealsMonth, res.data.logs||[])) }}>Clear</button>
                               </div>
                             </td>
                           </tr>
