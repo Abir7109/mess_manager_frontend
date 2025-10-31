@@ -67,16 +67,18 @@ export default function Dashboard() {
     // Load shared expenses for this month and compute my equal share
     try {
       const se = await api.get('/expenses/shared', { params: { month } })
-      const list = se.data.shared || []
+      const raw = se.data
+      const cand = Array.isArray(raw) ? raw : (raw?.shared || raw?.expenses || raw?.list || [])
+      const list = Array.isArray(cand) ? cand : []
       const myId = user?.id || user?._id
       let equalAll = 0
       let others = 0
       for (const e of list) {
-        const participants = e.participants && e.participants.length ? e.participants : null
-        const count = participants ? participants.length : (e.totalParticipants || 0)
-        const am = Number(e.amount) || 0
+        const participants = Array.isArray(e?.participants) ? e.participants : null
+        const count = participants ? participants.length : (Number(e?.participantsCount)||Number(e?.totalParticipants)||Number(e?.count)||0)
+        const am = Number(e?.amount) || 0
         if (!am || !count) continue
-        const isMine = participants ? participants.some(p => (p.id||p._id) === myId) : true
+        const isMine = participants ? participants.some(p => ((p.id||p._id||p.userId) === myId)) : true
         if (!isMine) continue
         const share = am / count
         if (e?.splitMode === 'equal_all' || e?.appliesToMeals === true) equalAll += share

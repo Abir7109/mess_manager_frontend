@@ -116,15 +116,26 @@ export default function Extras() {
   }
 
   async function loadShared() {
-    try {
-      const now = new Date();
-      const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
-      const r = await api.get('/expenses/shared',{ params:{ month } })
-      setSharedList(r.data.shared || [])
-    } catch (e) {
-      // preserve existing list on failure (e.g., 401 refresh or 404 route)
-      console.warn('Failed to load shared expenses', e?.response?.status || e)
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`
+    const attempts = [
+      () => api.get('/expenses/shared', { params: { month } }),
+      () => api.get('/expenses', { params: { month } }),
+      () => api.get('/admin/expenses/shared', { params: { month } }),
+      () => api.get('/admin/expenses', { params: { month } }),
+    ]
+    let lastErr
+    for (const fn of attempts) {
+      try {
+        const r = await fn()
+        const raw = r.data
+        const cand = Array.isArray(raw) ? raw : (raw?.shared || raw?.expenses || raw?.list || [])
+        const list = Array.isArray(cand) ? cand : []
+        setSharedList(list)
+        return
+      } catch (e) { lastErr = e }
     }
+    console.warn('Failed to load shared expenses', lastErr?.response?.status || lastErr)
   }
 
   return (
