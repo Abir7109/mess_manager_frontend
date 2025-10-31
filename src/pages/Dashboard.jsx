@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [openProfile, setOpenProfile] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', photoUrl: '' })
   const [sharedShare, setSharedShare] = useState(0)
+  const [sharedEqualAllShare, setSharedEqualAllShare] = useState(0)
 
   const dates = useMemo(() => {
     const start = dayjs(month + '-01')
@@ -68,21 +69,23 @@ export default function Dashboard() {
       const se = await api.get('/expenses/shared', { params: { month } })
       const list = se.data.shared || []
       const myId = user?.id || user?._id
-      const total = list.reduce((sum, e) => {
-        // Avoid double-counting expenses that are already included in the meal cost calculation.
-        // Heuristics:
-        //  - If backend marks splitMode === 'equal_all', treat it as meal-fund (groceries) => exclude from separate shared share.
-        //  - If backend flags appliesToMeals === true, also exclude.
-        if (e?.splitMode === 'equal_all' || e?.appliesToMeals === true) return sum
+      let equalAll = 0
+      let others = 0
+      for (const e of list) {
         const participants = e.participants && e.participants.length ? e.participants : null
         const count = participants ? participants.length : (e.totalParticipants || 0)
         const am = Number(e.amount) || 0
-        if (!am || !count) return sum
+        if (!am || !count) continue
         const isMine = participants ? participants.some(p => (p.id||p._id) === myId) : true
-        return isMine ? sum + (am / count) : sum
-      }, 0)
-      setSharedShare(total)
+        if (!isMine) continue
+        const share = am / count
+        if (e?.splitMode === 'equal_all' || e?.appliesToMeals === true) equalAll += share
+        else others += share
+      }
+      setSharedEqualAllShare(equalAll)
+      setSharedShare(equalAll + others)
     } catch {
+      setSharedEqualAllShare(0)
       setSharedShare(0)
     }
   })() }, [month, user])
@@ -106,7 +109,8 @@ export default function Dashboard() {
 
   const daysInMonth = dates.length
   const meals = summary?.totalMeals || 0
-  const spent = summary?.totalCost || 0
+  const baseSpent = summary?.totalCost || 0
+  const spent = Math.max(0, baseSpent - (sharedEqualAllShare || 0))
   const totalOut = spent + (sharedShare || 0)
 
   return (
