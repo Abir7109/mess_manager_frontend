@@ -74,11 +74,21 @@ export default function Admin() {
     await loadMeals(userId, editMealsMonth)
   }
 
-  function downloadPDF() {
-    const at = getSavedAccessToken()
-    const tokenPart = at ? `&access_token=${encodeURIComponent(at)}` : ''
-    const url = toAbsoluteUrl(`/api/admin/pdf?month=${month}${tokenPart}`)
-    window.open(url, '_blank')
+  async function downloadPDF() {
+    try {
+      const resp = await api.get('/admin/pdf', { params: { month }, responseType: 'blob' })
+      const blob = new Blob([resp.data], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `mess-overview-${month}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } catch (e) {
+      alert(e?.response?.data?.error || 'Failed to download PDF')
+    }
   }
 
   const filtered = useMemo(() => {
