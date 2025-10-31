@@ -251,7 +251,7 @@ export default function Admin() {
             <div className="scroll-x">
               <table className="table wide">
                 <thead>
-                  <tr><th>Date</th><th>Breakfast</th><th>Dinner</th></tr>
+                  <tr><th>Date</th><th>Breakfast</th><th>Dinner</th><th>Override (meals)</th></tr>
                 </thead>
                 <tbody>
                   {editMealsLogs.map(l => (
@@ -262,6 +262,14 @@ export default function Admin() {
                       </td>
                       <td>
                         <input type="checkbox" checked={!!l.dinner} onChange={e=>toggleMeal(editMealsUser._id||editMealsUser.id, l.date, 'dinner', e.target.checked)} />
+                      </td>
+                      <td>
+                        <input className="input" style={{maxWidth:100}} type="number" step="0.01" placeholder="auto" value={l.overrideCount ?? ''}
+                          onChange={async (e)=>{
+                            const val = e.target.value
+                            await api.post('/admin/meals/upsert', { userId: editMealsUser._id||editMealsUser.id, date: l.date, overrideCount: val === '' ? '' : Number(val) })
+                            await loadMeals(editMealsUser._id||editMealsUser.id, editMealsMonth)
+                          }} />
                       </td>
                     </tr>
                   ))}
