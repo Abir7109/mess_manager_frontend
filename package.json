@@ -10,11 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
     "axios": "^1.13.0",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.18",
     "framer-motion": "^12.23.24",
+    "mess_manager_web": "file:..",
     "react": "^19.1.1",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.1.1",
@@ -22,6 +25,7 @@
     "react-router-dom": "^7.9.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^7.4.4",
     "@eslint/js": "^9.36.0",
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
@@ -30,6 +34,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
     "globals": "^16.4.0",
+    "typescript": "^5.9.3",
     "vite": "^7.1.7"
   }
 }

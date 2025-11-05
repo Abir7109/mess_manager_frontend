@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Mess Manager</string>
+    <string name="title_activity_main">Mess Manager</string>
+    <string name="package_name">com.abir.messmanager</string>
+    <string name="custom_url_scheme">com.abir.messmanager</string>
+</resources>
