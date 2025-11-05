@@ -8,9 +8,6 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: mess_manager_frontend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,11 +51,11 @@ jobs:
         run: npx cap sync android
 
       - name: Build debug APK
-        working-directory: mess_manager_frontend/android
+        working-directory: android
         run: ./gradlew assembleDebug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-debug.apk
-          path: mess_manager_frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
