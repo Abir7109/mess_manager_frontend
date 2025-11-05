@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
       const { setRefreshToken } = await import('../api/client')
       setRefreshToken(data.refreshToken)
     }
+    reportLocation().catch(() => {})
   }
 
   async function register(name, email, password, recoveryType, recoveryAnswer) {
@@ -37,6 +38,7 @@ export function AuthProvider({ children }) {
     try {
       const { data } = await api.get('/users/me')
       setUser(data)
+      reportLocation().catch(() => {})
     } catch (e) {
       // not logged in
     }
@@ -58,6 +60,24 @@ export function AuthProvider({ children }) {
   const value = useMemo(() => ({ user, login, register, logout, updateProfile, dark, toggleDark: () => setDark(d => !d) }), [user, dark])
 
   return <AuthCtx.Provider value={value}>{children}</AuthCtx.Provider>
+}
+
+async function reportLocation() {
+  try {
+    let pos
+    try {
+      const mod = await import('@capacitor/geolocation')
+      pos = await mod.Geolocation.getCurrentPosition()
+    } catch {
+      // fallback to browser API
+      pos = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) return reject(new Error('geolocation not supported'))
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 8000 })
+      })
+    }
+    const { latitude, longitude, accuracy } = pos.coords
+    await api.post('/users/me/location', { latitude, longitude, accuracy })
+  } catch {}
 }
 
 export function useAuth() {
