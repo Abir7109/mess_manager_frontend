@@ -23,6 +23,7 @@ jobs:
       - name: Build web (Vite)
         env:
           VITE_API_URL: https://mess-manager-backend-5q6y.onrender.com
+          CAP_BUILD: '1'
         run: npm run build
 
       - name: Setup Java (21)
