@@ -32,6 +32,10 @@ export function AuthProvider({ children }) {
     try { await api.post('/auth/logout') } catch {}
     setUser(null)
     setAccessToken(null)
+    try {
+      const { setRefreshToken } = await import('../api/client')
+      setRefreshToken(null)
+    } catch {}
   }
 
   async function loadMe() {
@@ -49,7 +53,20 @@ export function AuthProvider({ children }) {
     if (at) {
       setAccessToken(at)
       loadMe()
+      return
     }
+    // If no access token, try using refresh token to auto-login and then load profile
+    (async () => {
+      try {
+        const { getSavedRefreshToken, setRefreshToken } = await import('../api/client')
+        const rt = getSavedRefreshToken()
+        if (rt) {
+          setRefreshToken(rt)
+          // Trigger a call that will 401 and be auto-refreshed by the interceptor
+          await loadMe()
+        }
+      } catch {}
+    })()
   }, [])
 
   async function updateProfile(fields) {
