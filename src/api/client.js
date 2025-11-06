@@ -1,38 +1,51 @@
 import axios from 'axios'
 
-const apiHost = (typeof window !== 'undefined' && (window.__MM_API_URL || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('MM_API_URL')) || (typeof localStorage !== 'undefined' && localStorage.getItem('MM_API_URL')))) || import.meta.env.VITE_API_URL || 'https://mess-manager-backend-5q6y.onrender.com'
+// Resolve API host (allow override via window/MM_API_URL)
+const apiHost = (typeof window !== 'undefined' && (window.__MM_API_URL || (typeof localStorage !== 'undefined' && localStorage.getItem('MM_API_URL')) || (typeof sessionStorage !== 'undefined' && sessionStorage.getItem('MM_API_URL')))) || import.meta.env.VITE_API_URL || 'https://mess-manager-backend-5q6y.onrender.com'
 const api = axios.create({
   baseURL: apiHost.replace(/\/$/, '') + '/api',
-  withCredentials: false,
+  withCredentials: false, // header-token auth only
 })
 
 let accessToken = null
 let refreshToken = null
 
+function ls() { try { return localStorage } catch { return null } }
+function ss() { try { return sessionStorage } catch { return null } }
+
 export function setAccessToken(token) {
   accessToken = token
   try {
-    if (token) sessionStorage.setItem('MM_AT', token)
-    else sessionStorage.removeItem('MM_AT')
+    const L = ls(), S = ss()
+    if (token) {
+      L?.setItem('MM_AT', token); S?.setItem('MM_AT', token)
+    } else {
+      L?.removeItem('MM_AT'); S?.removeItem('MM_AT')
+    }
   } catch {}
 }
 export function setRefreshToken(token) {
   refreshToken = token
   try {
-    if (token) sessionStorage.setItem('MM_RT', token)
-    else sessionStorage.removeItem('MM_RT')
+    const L = ls(), S = ss()
+    if (token) {
+      L?.setItem('MM_RT', token); S?.setItem('MM_RT', token)
+    } else {
+      L?.removeItem('MM_RT'); S?.removeItem('MM_RT')
+    }
   } catch {}
 }
 export function setApiHost(url) {
   if (!url) return
-  sessionStorage.setItem('MM_API_URL', url)
+  const L = ls(), S = ss()
+  L?.setItem('MM_API_URL', url); S?.setItem('MM_API_URL', url)
   api.defaults.baseURL = url.replace(/\/$/, '') + '/api'
 }
 export function getSavedAccessToken() {
-  try { return sessionStorage.getItem('MM_AT') } catch { return null }
+  try { return (ls()?.getItem('MM_AT')) || (ss()?.getItem('MM_AT')) } catch { return null }
 }
 export function getSavedRefreshToken() {
-  try { return sessionStorage.getItem('MM_RT') } catch { return null }
+  try { return (ls()?.getItem('MM_RT')) || (ss()?.getItem('MM_RT')) } catch { return null }
 }
 
 export function toAbsoluteUrl(url) {
