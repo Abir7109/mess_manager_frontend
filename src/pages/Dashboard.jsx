@@ -49,7 +49,6 @@ export default function Dashboard() {
   const [openProfile, setOpenProfile] = useState(false)
   const [form, setForm] = useState({ name: '', phone: '', photoUrl: '' })
   const [sharedShare, setSharedShare] = useState(0)
-  const [sharedEqualAllShare, setSharedEqualAllShare] = useState(0)
 
   const dates = useMemo(() => {
     const start = dayjs(month + '-01')
@@ -64,32 +63,8 @@ export default function Dashboard() {
     setLogs(data)
     const s = await api.get('/meals/summary/mine', { params: { month } })
     setSummary(s.data)
-    // Load shared expenses for this month and compute my equal share
-    try {
-      const se = await api.get('/expenses/shared', { params: { month } })
-      const raw = se.data
-      const cand = Array.isArray(raw) ? raw : (raw?.shared || raw?.expenses || raw?.list || [])
-      const list = Array.isArray(cand) ? cand : []
-      const myId = user?.id || user?._id
-      let equalAll = 0
-      let others = 0
-      for (const e of list) {
-        const participants = Array.isArray(e?.participants) ? e.participants : null
-        const count = participants ? participants.length : (Number(e?.participantsCount)||Number(e?.totalParticipants)||Number(e?.count)||0)
-        const am = Number(e?.amount) || 0
-        if (!am || !count) continue
-        const isMine = participants ? participants.some(p => ((p.id||p._id||p.userId) === myId)) : true
-        if (!isMine) continue
-        const share = am / count
-        if (e?.splitMode === 'equal_all' || e?.appliesToMeals === true) equalAll += share
-        else others += share
-      }
-      setSharedEqualAllShare(equalAll)
-      setSharedShare(equalAll + others)
-    } catch {
-      setSharedEqualAllShare(0)
-      setSharedShare(0)
-    }
+    // Use backend-calculated shared share to avoid double counting
+    setSharedShare(Number(s.data?.sharedShare || 0))
   })() }, [month, user])
 
   useEffect(() => {
@@ -111,9 +86,9 @@ export default function Dashboard() {
 
   const daysInMonth = dates.length
   const meals = summary?.totalMeals || 0
-  const baseSpent = summary?.totalCost || 0
-  const spent = Math.max(0, baseSpent - (sharedEqualAllShare || 0))
-  const totalOut = spent + (sharedShare || 0)
+  const mealsSpent = summary?.mealsCost || 0
+  const spent = mealsSpent
+  const totalOut = (summary?.totalCost != null) ? summary.totalCost : (spent + (sharedShare || 0))
 
   return (
     <div className="container">
