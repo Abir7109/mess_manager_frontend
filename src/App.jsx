@@ -2,6 +2,7 @@ import { HashRouter as Router, Routes, Route, Navigate, Link } from 'react-route
 import { useState, useEffect, lazy, Suspense, useMemo } from 'react'
 import { motion, AnimatePresence, MotionConfig } from 'framer-motion'
 import './theme.css'
+import api from './api/client'
 const Home = lazy(() => import('./pages/Home'))
 const Login = lazy(() => import('./pages/Login'))
 const Register = lazy(() => import('./pages/Register'))
@@ -120,6 +121,10 @@ function App() {
     const isAndroid = /Android/i.test(ua)
     return (isSmall || prefers || isAndroid) ? 'always' : 'user'
   }, [])
+
+  // Warm up backend to avoid long first request when Render is cold
+  useEffect(() => { api.get('/health').catch(() => {}) }, [])
+
   return (
     <AuthProvider>
       <MotionConfig reducedMotion={reduced}>
