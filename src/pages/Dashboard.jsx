@@ -11,29 +11,32 @@ import MealPriceChart from '../components/MealPriceChart'
 import { LuSunrise, LuMoon } from 'react-icons/lu'
 
 const DayCell = memo(function DayCell({ date, log, onChange, editable }) {
-  const [b, setB] = useState(!!log?.breakfast)
-  const [d, setD] = useState(!!log?.dinner)
-  useEffect(() => { setB(!!log?.breakfast); setD(!!log?.dinner) }, [log])
+  const initialBQ = Number.isFinite(log?.breakfastQuarters) ? log.breakfastQuarters : (log?.breakfast ? 2 : 0)
+  const initialDQ = Number.isFinite(log?.dinnerQuarters) ? log.dinnerQuarters : (log?.dinner ? 2 : 0)
+  const [bq, setBQ] = useState(initialBQ)
+  const [dq, setDQ] = useState(initialDQ)
+  useEffect(() => {
+    setBQ(Number.isFinite(log?.breakfastQuarters) ? log.breakfastQuarters : (log?.breakfast ? 2 : 0))
+    setDQ(Number.isFinite(log?.dinnerQuarters) ? log.dinnerQuarters : (log?.dinner ? 2 : 0))
+  }, [log])
   async function save(next) { if (editable) await onChange(date, next) }
-  const cls = `day${b ? ' with-b' : ''}${d ? ' with-d' : ''}`
+  const cls = `day${bq>0 ? ' with-b' : ''}${dq>0 ? ' with-d' : ''}`
   return (
     <div className={cls}>
-      <div className="hint">{b ? 'B✓' : 'B✕'} • {d ? 'D✓' : 'D✕'}</div>
+      <div className="hint">B { (bq*0.25).toFixed(2) } • D { (dq*0.25).toFixed(2) }</div>
       <h4>{dayjs(date).format('D ddd')}</h4>
       <div className="meal-toggles">
         <button
-          className={`chip b ${b ? 'on' : 'off'}`}
-          aria-pressed={b}
-          disabled={!editable}
-          onClick={() => { if (!editable) return; const nb = !b; setB(nb); save({ breakfast: nb, dinner: d }) }}>
-          <LuSunrise /> <span className="txt">Breakfast</span>
+          className={`chip b ${bq>0 ? 'on' : 'off'}`}
+          disabled={!editable || bq>=2}
+          onClick={() => { if (!editable || bq>=2) return; const nbq = bq+1; setBQ(nbq); save({ breakfastQuarters: nbq, dinnerQuarters: dq }) }}>
+          <LuSunrise /> <span className="txt">Breakfast +0.25</span>
         </button>
         <button
-          className={`chip d ${d ? 'on' : 'off'}`}
-          aria-pressed={d}
-          disabled={!editable}
-          onClick={() => { if (!editable) return; const nd = !d; setD(nd); save({ breakfast: b, dinner: nd }) }}>
-          <LuMoon /> <span className="txt">Dinner</span>
+          className={`chip d ${dq>0 ? 'on' : 'off'}`}
+          disabled={!editable || dq>=2}
+          onClick={() => { if (!editable || dq>=2) return; const ndq = dq+1; setDQ(ndq); save({ breakfastQuarters: bq, dinnerQuarters: ndq }) }}>
+          <LuMoon /> <span className="txt">Dinner +0.25</span>
         </button>
       </div>
     </div>
